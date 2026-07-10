@@ -1,0 +1,17 @@
+# Copy this to config.yml after creating a Cloudflare named tunnel.
+# config.yml is intentionally gitignored because it contains the tunnel ID and credential file path.
+#
+# Required Cloudflare setup:
+#   cloudflared tunnel login
+#   cloudflared tunnel create algo-ict-trader-api
+#   cloudflared tunnel route dns algo-ict-trader-api api.<your-domain>
+#
+# Then update the placeholders below.
+
+tunnel: <tunnel-uuid>
+credentials-file: C:\Users\saite\.cloudflared\<tunnel-uuid>.json
+
+ingress:
+  - hostname: api.<your-domain>
+    service: http://127.0.0.1:8765
+  - service: http_status:404
