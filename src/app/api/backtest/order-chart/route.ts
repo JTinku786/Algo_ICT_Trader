@@ -29,7 +29,7 @@ type ObjRow = Record<string, unknown>;
 function mapZone(o: ObjRow, kindFallback: string) {
   const top = num(o.top);
   const bottom = num(o.bottom);
-  const t = epoch((o.event_datetime_et as string) || (o.formed_datetime_et as string) || null);
+  const t = epoch((o.formed_datetime_et as string) || (o.start_datetime_et as string) || (o.bar_timestamp_et as string) || (o.event_datetime_et as string) || null);
   if (top === null || bottom === null || t === null) return null;
   return {
     kind: (o.zone_type as string) || (o.event_type as string) || kindFallback,
@@ -46,7 +46,7 @@ function mapZone(o: ObjRow, kindFallback: string) {
 
 function mapLevel(o: ObjRow, kind: string) {
   const level = num(o.level);
-  const t = epoch((o.event_datetime_et as string) || (o.bar_timestamp_et as string) || null);
+  const t = epoch((o.bar_timestamp_et as string) || (o.formed_datetime_et as string) || (o.event_datetime_et as string) || null);
   if (level === null) return null;
   return {
     kind,
