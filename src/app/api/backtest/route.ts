@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPostgresPool, hasPostgresConfig } from "@/lib/db";
+import { getPostgresPool } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -91,8 +91,11 @@ export async function GET(request: NextRequest) {
   };
   const oosPct = Math.min(50, Math.max(10, Number(sp.get("oos_pct") || 30) || 30));
 
+  // Prefer the REST bridge whenever it is configured (e.g. on Vercel, which
+  // reaches the DB through the local REST API). Direct Postgres is only used
+  // when no bridge URL is set (e.g. local development).
   const restApiUrl = process.env.CANDLES_REST_API_URL;
-  if (!hasPostgresConfig() && restApiUrl) {
+  if (restApiUrl) {
     const upstreamUrl = new URL("/api/backtest", restApiUrl);
     for (const [key, value] of sp.entries()) {
       upstreamUrl.searchParams.set(key, value);

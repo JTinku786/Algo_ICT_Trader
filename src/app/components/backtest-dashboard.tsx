@@ -436,6 +436,13 @@ export default function BacktestDashboard() {
         <div className="mt-2 font-mono text-[11px] text-[#93a1b6]">
           {symbol === "ALL" ? `All symbols (${market === "ALL" ? "all markets" : MARKET_OPTIONS.find((m) => m.value === market)?.label ?? market})` : `${symbol} - ${market === "ALL" ? getSymbolMarket(symbol) : MARKET_OPTIONS.find((m) => m.value === market)?.label}`} | {strategy === "ALL" ? "All strategies" : strategyNameById.get(strategy) || strategy} - {data?.total_trades ?? 0} closed trades. {sizingMode === "fixed_qty" ? `Sizing: ${fmt(Number(quantity), 0)} units from ${money(Number(initialCapital))} capital.` : `Sizing: ${money(Number(riskUsd))} risk per trade from ${money(Number(initialCapital))} capital.`} Net results include {fmt(Number(commissionBps), 1)} bps commission + {fmt(Number(slippageBps), 1)} bps slippage per side.
         </div>
+        {strategy !== "ALL" ? (
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+            <span className="text-[#7f8ca3]">Strategy reference:</span>
+            <StrategyLink code={strategy} label={`${strategy} — ${strategyNameById.get(strategy) || "read strategy blog"}`} className="rounded border border-[#d9a441]/30 bg-[#d9a441]/10 px-2 py-1 font-semibold text-[#f2c873]" showIcon />
+            <span className="text-[#657187]">Click any strategy code in the tables below to open its blog.</span>
+          </div>
+        ) : null}
       </div>
 
       {error ? <div className="rounded-md border border-[#e5484d]/30 bg-[#e5484d]/10 p-4 text-sm text-[#ff9da2]">Error: {error}</div> : null}

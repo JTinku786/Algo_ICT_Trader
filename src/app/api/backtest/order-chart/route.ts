@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPostgresPool, hasPostgresConfig } from "@/lib/db";
+import { getPostgresPool } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
   }
 
   const restApiUrl = process.env.CANDLES_REST_API_URL;
-  if (!hasPostgresConfig() && restApiUrl) {
+  if (restApiUrl) {
     const upstreamUrl = new URL("/api/backtest/order-chart", restApiUrl);
     for (const [key, value] of sp.entries()) {
       upstreamUrl.searchParams.set(key, value);

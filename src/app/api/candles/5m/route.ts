@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPostgresPool, hasPostgresConfig } from "@/lib/db";
+import { getPostgresPool } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     .slice(0, 25);
 
   const restApiUrl = process.env.CANDLES_REST_API_URL;
-  if (!hasPostgresConfig() && restApiUrl) {
+  if (restApiUrl) {
     const upstreamUrl = new URL("/api/candles/5m", restApiUrl);
     upstreamUrl.searchParams.set("market", market);
     upstreamUrl.searchParams.set("limit", String(limit));
