@@ -14,10 +14,11 @@ import {
   SlidersHorizontal,
   TrendingDown,
   TrendingUp,
-  X,
   XCircle,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { OrderChart } from "./order-chart";
+import { StrategyLink } from "./blog-context";
 
 type DirectionStats = {
   trades: number;
@@ -206,61 +207,11 @@ type BacktestResponse = {
   returned?: number;
 };
 
-type Candle = { time: number; open: number; high: number; low: number; close: number };
-type OverlayZone = { kind: string; top: number; bottom: number; time: number; direction: string | null; broken: boolean; mitigated: boolean; filled: boolean; label: string };
-type OverlayLevel = { kind: string; level: number; time: number; side: string | null; direction: string | null; label: string };
-type BiasInfo = { weekly: string | null; daily: string | null; one_hour: string | null };
-type OrderChartResponse = {
-  success: boolean;
-  error?: string;
-  timeframe?: string;
-  order?: {
-    order_id: string;
-    symbol: string;
-    market: string;
-    direction: string | null;
-    entry_price: number | null;
-    filled_price: number | null;
-    stoploss: number | null;
-    tp1: number | null;
-    tp2: number | null;
-    tp3: number | null;
-    filled_at: string | null;
-    close_ts: string | null;
-    close_price: number | null;
-    close_reason: string | null;
-    realized_r: number | null;
-    outcome: string | null;
-  };
-  candles?: Candle[];
-  markers?: {
-    entry: { time: number; price: number | null };
-    exit: { time: number; price: number | null; outcome: string };
-  };
-  overlays?: {
-    order_blocks: OverlayZone[];
-    fvgs: OverlayZone[];
-    liquidity: OverlayLevel[];
-    swings: OverlayLevel[];
-    structure: OverlayZone[];
-    bias: BiasInfo | null;
-    timeframe_5m: Record<string, OverlayZone[] | OverlayLevel[]>;
-    timeframe_15m: Record<string, OverlayZone[] | OverlayLevel[]>;
-    timeframe_30m: Record<string, OverlayZone[] | OverlayLevel[]>;
-    timeframe_1h: Record<string, OverlayZone[] | OverlayLevel[]>;
-    timeframe_daily: Record<string, OverlayZone[] | OverlayLevel[]>;
-    timeframe_weekly: Record<string, OverlayZone[] | OverlayLevel[]>;
-  };
-  window?: { from: number; to: number };
-};
-
 type ColumnKey = "close_ts" | "symbol" | "strategy_id" | "strategy_name" | "direction" | "filled" | "stop" | "tp1" | "close_price" | "quantity" | "risk_usd" | "gross_pnl_usd" | "transaction_cost_usd" | "pnl_usd" | "r" | "hold_min" | "outcome";
 type Column = { key: ColumnKey; label: string; numeric?: boolean; defaultVisible: boolean; render: (trade: TradeRow) => string; tone?: (trade: TradeRow) => "green" | "red" | "muted" | "white" };
 
 const GREEN = "#2fbf71";
 const RED = "#e5484d";
-const GOLD = "#d9a441";
-const BLUE = "#64d2ff";
 const MUTED = "#93a1b6";
 
 const COLUMNS: Column[] = [
@@ -523,7 +474,7 @@ export default function BacktestDashboard() {
         </Panel>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1.15fr_1.35fr]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1.35fr)]">
         <Panel icon={BarChart3} title="Trade List" note={`${trades.length} shown${data && data.total_trades && data.total_trades > trades.length ? ` of ${data.total_trades}` : ""}`}>
           <ColumnChooser visibleColumns={visibleColumns} onChange={setVisibleColumns} />
           <div className="max-h-[560px] overflow-auto">
@@ -558,7 +509,7 @@ export default function BacktestDashboard() {
         </Panel>
 
         <Panel icon={BarChart3} title="Order Chart" note={selectedOrder ? `${selectedOrder.symbol} - ${selectedOrder.strategy_id}` : "select a trade"}>
-          {selectedOrder ? <OrderChart order={selectedOrder} targetNo={targetNo} onClose={() => setSelectedOrder(null)} /> : <div className="grid h-[520px] place-items-center text-sm text-[#93a1b6]">Click a trade to inspect entry, stop, targets, exit and candle path.</div>}
+          {selectedOrder ? <OrderChart order={{ order_id: selectedOrder.order_id, symbol: selectedOrder.symbol, strategy_id: selectedOrder.strategy_id, direction: selectedOrder.direction, r: selectedOrder.r }} targetNo={targetNo} endpoint="/api/backtest/order-chart" onClose={() => setSelectedOrder(null)} /> : <div className="grid h-[520px] place-items-center text-sm text-[#93a1b6]">Click a trade to inspect the 5-minute entry, stop, targets and candle path.</div>}
         </Panel>
       </div>
     </section>
@@ -1018,7 +969,7 @@ function BreakdownTable({ rows, onPick }: { rows: BreakdownRow[]; onPick: (id: s
         <tbody className="divide-y divide-white/10 font-mono">
           {rows.map((row) => (
             <tr key={row.strategy_id} onClick={() => onPick(row.strategy_id)} className="cursor-pointer hover:bg-white/[0.03]">
-              <td className="px-3 py-2 text-white">{row.strategy_id}</td>
+              <td className="px-3 py-2 text-white"><StrategyLink code={row.strategy_id} label={row.strategy_id} /></td>
               <td className="px-3 py-2 font-sans text-[#d6deec]">{strategyDisplayName(row.strategy_id, row.strategy_name)}</td>
               <td className="px-3 py-2 text-right text-[#d6deec]">{fmtInt(row.trades)}</td>
               <td className="px-3 py-2 text-right text-[#d6deec]">{fmt(row.win_rate, 1)}</td>
@@ -1077,335 +1028,8 @@ function TradeCell({ column, trade }: { column: Column; trade: TradeRow }) {
       </td>
     );
   }
+  if (column.key === "strategy_id") {
+    return <td className="px-3 py-2 text-white"><StrategyLink code={trade.strategy_id} label={trade.strategy_id || "-"} /></td>;
+  }
   return <td className={cx("px-3 py-2", column.numeric && "text-right", toneClass(tone))}>{column.render(trade)}</td>;
-}
-
-const ICT_GREEN = "#4ade80";
-const ICT_RED = "#fb7185";
-const ICT_PURPLE = "#c084fc";
-const ICT_CYAN = "#67e8f9";
-const ICT_ORANGE = "#fb923c";
-const ICT_BLUE = "#60a5fa";
-const ICT_YELLOW = "#facc15";
-
-function OrderChart({ order, targetNo, onClose }: { order: TradeRow; targetNo: string; onClose: () => void }) {
-  const [data, setData] = useState<OrderChartResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    const timer = window.setTimeout(() => {
-      setLoading(true);
-      setError("");
-      fetch(`/api/backtest/order-chart?order_id=${order.order_id}&target_no=${targetNo}`, { cache: "no-store" })
-        .then((response) => response.json())
-        .then((payload: OrderChartResponse) => {
-          if (cancelled) return;
-          if (!payload.success) throw new Error(payload.error || "Chart request failed");
-          setData(payload);
-        })
-        .catch((err) => !cancelled && setError(err instanceof Error ? err.message : "Chart request failed"))
-        .finally(() => !cancelled && setLoading(false));
-    }, 0);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [order.order_id, targetNo]);
-
-  const overlays = data?.overlays;
-  const bias = overlays?.bias;
-  const tfLabel = data?.timeframe ?? "5m";
-
-  // Determine which timeframe panels have data
-  const timeframes = ["5m", "15m", "30m", "1h"] as const;
-  const tfKeys = { "5m": "timeframe_5m", "15m": "timeframe_15m", "30m": "timeframe_30m", "1h": "timeframe_1h" } as const;
-  const activeTfs = timeframes.filter((tf) => {
-    const key = tfKeys[tf];
-    const tfData = overlays?.[key as keyof typeof overlays];
-    return tfData && Object.values(tfData as Record<string, unknown[]>).some((arr) => arr.length > 0);
-  });
-
-  // Always show 5m if we have candles
-  if (data?.candles?.length && !activeTfs.includes("5m")) {
-    activeTfs.unshift("5m");
-  }
-
-  return (
-    <div className="p-3">
-      {/* Header: Legend + Bias text + Order info */}
-      <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] text-[#93a1b6]">
-        <Legend color={GOLD} label="Entry" />
-        <Legend color={RED} label="Stop" />
-        <Legend color={GREEN} label="TPs" />
-        <Legend color={BLUE} label="Exit" />
-        <Legend color={ICT_PURPLE} label="OB" />
-        <Legend color={ICT_CYAN} label="FVG" />
-        <Legend color={ICT_ORANGE} label="Liq" />
-        <Legend color={ICT_YELLOW} label="BOS/MSS" />
-        <Legend color={ICT_BLUE} label="Swing" />
-        {bias ? (
-          <span className="ml-1 rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-white/80">
-            W: <BiasBadge v={bias.weekly} /> | D: <BiasBadge v={bias.daily} /> | 1h: <BiasBadge v={bias.one_hour} />
-          </span>
-        ) : null}
-        <span className="ml-auto font-mono text-[10px] text-white/50">{tfLabel}</span>
-        <span className={cx("font-mono", order.r >= 0 ? "text-[#62d894]" : "text-[#ff8b91]")}>{order.r >= 0 ? "+" : ""}{fmt(order.r)}R</span>
-        <button onClick={onClose} className="grid size-6 place-items-center rounded border border-white/10 text-[#93a1b6] hover:text-white"><X className="size-3.5" /></button>
-      </div>
-
-      {loading ? <div className="grid h-[470px] place-items-center text-sm text-[#93a1b6]">Loading candles...</div> : null}
-      {error ? <div className="grid h-[470px] place-items-center text-sm text-[#ff9da2]">{error}</div> : null}
-
-      {!loading && !error ? (
-        <div className="space-y-2">
-          {activeTfs.map((tf) => {
-            const is5m = tf === "5m";
-            const panelHeight = is5m ? 420 : 200;
-            return (
-              <div key={tf}>
-                <div className="mb-0.5 text-[10px] font-mono text-white/40">{tf.toUpperCase()} Panel</div>
-                <CandleSvg data={data} timeframeKey={tf} height={panelHeight} />
-              </div>
-            );
-          })}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function BiasBadge({ v }: { v: string | null | undefined }) {
-  if (!v) return <span className="text-[#93a1b6]">-</span>;
-  const c = v.toLowerCase().startsWith("bull") ? "#62d894" : v.toLowerCase().startsWith("bear") ? "#ff8b91" : "#93a1b6";
-  return <span style={{ color: c }}>{v.substring(0, 3).toUpperCase()}</span>;
-}
-
-function Legend({ color, label }: { color: string; label: string }) {
-  return <span className="flex items-center gap-1"><span className="h-0.5 w-4 shrink-0" style={{ backgroundColor: color }} />{label}</span>;
-}
-
-function CandleSvg({ data, timeframeKey = "5m", height = 420 }: { data: OrderChartResponse | null; timeframeKey: string; height?: number }) {
-  const candles = data?.candles ?? [];
-  const overlays = data?.overlays;
-  const is5m = timeframeKey === "5m";
-  const width = 900;
-  const pad = 34;
-  const entryTime = data?.markers?.entry?.time ?? 0;
-  const entryPrice = data?.markers?.entry?.price ?? data?.order?.filled_price ?? data?.order?.entry_price;
-  const windowFrom = data?.window?.from ?? 0;
-  const windowTo = data?.window?.to ?? 0;
-  const timeSpan = Math.max(windowTo - windowFrom, 1);
-
-  // Determine which timeframe's overlays to show
-  const tfMap: Record<string, string> = {
-    "5m": "timeframe_5m", "15m": "timeframe_15m", "30m": "timeframe_30m",
-    "1h": "timeframe_1h", "daily": "timeframe_daily", "weekly": "timeframe_weekly",
-  };
-  const tfKey = tfMap[timeframeKey] || "timeframe_5m";
-  const tfOverlays = overlays ? ((overlays as Record<string, unknown>)[tfKey] as Record<string, OverlayZone[] | OverlayLevel[]> | undefined) : undefined;
-
-  // Price extremes (from candles if 5m, otherwise from overlays + order prices)
-  const allPrices: number[] = [];
-  if (is5m && candles.length) {
-    allPrices.push(...candles.map((c) => c.low), ...candles.map((c) => c.high));
-  }
-  if (tfOverlays) {
-    for (const zone of [...(tfOverlays["order_blocks"] as OverlayZone[] ?? []), ...(tfOverlays["fvgs"] as OverlayZone[] ?? []), ...(tfOverlays["structure"] as OverlayZone[] ?? [])]) {
-      if (Number.isFinite(zone.top)) allPrices.push(zone.top);
-      if (Number.isFinite(zone.bottom)) allPrices.push(zone.bottom);
-    }
-    for (const level of [...(tfOverlays["liquidity"] as OverlayLevel[] ?? []), ...(tfOverlays["swings"] as OverlayLevel[] ?? [])]) {
-      if (Number.isFinite(level.level)) allPrices.push(level.level);
-    }
-  }
-  const orderPrices = [data?.order?.filled_price ?? data?.order?.entry_price, data?.order?.stoploss, data?.order?.tp1, data?.order?.tp2, data?.order?.tp3, data?.order?.close_price].filter((v): v is number => typeof v === "number" && Number.isFinite(v));
-  allPrices.push(...orderPrices);
-  // Ensure some range even with no prices
-  if (!allPrices.length) { allPrices.push(100, 101); }
-  const min = Math.min(...allPrices);
-  const max = Math.max(...allPrices);
-  const priceRange = Math.max(max - min, 0.0001);
-
-  // Coordinate helpers
-  const xByTime = (timeSec: number) => {
-    if (timeSpan <= 0) return pad;
-    const frac = (timeSec - windowFrom) / timeSpan;
-    return pad + Math.max(0, Math.min(1, frac)) * (width - pad * 2);
-  };
-  const y = (price: number) => pad + ((max - price) / priceRange) * (height - pad * 2);
-
-  // Build overlay filter: only show concepts formed before/at entry time (+10 min)
-  const beforeEntry = (t: number | null | undefined) => t === null || t === undefined || t <= entryTime + 600;
-
-  // Visible overlays
-  const visibleZones = (zones: OverlayZone[]) => zones.filter((z) => beforeEntry(z.time));
-  const visibleLevels = (levels: OverlayLevel[]) => levels.filter((l) => beforeEntry(l.time));
-  const showZones = tfOverlays ? {
-    order_blocks: visibleZones(tfOverlays["order_blocks"] as OverlayZone[] ?? []),
-    fvgs: visibleZones(tfOverlays["fvgs"] as OverlayZone[] ?? []),
-    structure: visibleZones(tfOverlays["structure"] as OverlayZone[] ?? []),
-    liquidity: visibleLevels(tfOverlays["liquidity"] as OverlayLevel[] ?? []),
-    swings: visibleLevels(tfOverlays["swings"] as OverlayLevel[] ?? []),
-  } : null;
-
-  const entryX = xByTime(entryTime);
-
-  // Draw a horizontal price line starting from entry time
-  const entryLine = (price: number | null | undefined, color: string, label: string, dashed = false) => {
-    if (price === null || price === undefined) return null;
-    const py = y(price);
-    return (
-      <g key={label}>
-        <line x1={entryX} x2={width - pad} y1={py} y2={py} stroke={color} strokeDasharray={dashed ? "5 5" : undefined} />
-        <text x={width - pad + 4} y={py + 4} fill={color} fontSize="10">{label}</text>
-      </g>
-    );
-  };
-
-  // Format entry datetime label
-  const entryDateStr = data?.order?.filled_at
-    ? (() => {
-        const d = new Date(data.order!.filled_at!);
-        return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-      })()
-    : "";
-
-  // Generate hour markers for timeline labels (both 5m and overlay panels)
-  const hourTicks: { x: number; label: string }[] = [];
-  if (timeSpan > 0) {
-    const startHour = Math.floor(windowFrom / 3600) * 3600;
-    for (let t = startHour; t <= windowTo; t += 3600) {
-      const tx = xByTime(t);
-      if (tx >= pad && tx <= width - pad) {
-        const d = new Date(t * 1000);
-        hourTicks.push({ x: tx, label: d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }) });
-      }
-    }
-  }
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} className={`w-full`} style={{ height: `${height}px`, maxHeight: `${height}px` }}>
-      <defs>
-        <clipPath id={`afterEntry-${timeframeKey}`}><polygon points={`${entryX},0 ${width},0 ${width},${height} ${entryX},${height}`} /></clipPath>
-      </defs>
-
-      {/* Background grid */}
-      {[0, 1, 2, 3, 4].map((i) => (
-        <line key={`g-${i}`} x1={pad} x2={width - pad} y1={pad + (i / 4) * (height - pad * 2)} y2={pad + (i / 4) * (height - pad * 2)} stroke="rgba(255,255,255,0.06)" />
-      ))}
-
-      {/* Timeline labels (hour ticks at bottom) */}
-      {hourTicks.map((tick, i) => (
-        <text key={`tl-${i}`} x={tick.x} y={height - 2} fill="rgba(255,255,255,0.25)" fontSize="8" textAnchor="middle">
-          {tick.label}
-        </text>
-      ))}
-
-      {/* Price labels on y-axis */}
-      {[0, 1, 2, 3, 4].map((i) => {
-        const price = max - (i / 4) * priceRange;
-        return (
-          <text key={`p-${i}`} x={pad - 4} y={pad + (i / 4) * (height - pad * 2) + 3} fill="rgba(255,255,255,0.25)" fontSize="9" textAnchor="end">
-            {price.toFixed(2)}
-          </text>
-        );
-      })}
-
-      {/* Entry vertical line */}
-      <line x1={entryX} x2={entryX} y1={pad} y2={height - pad} stroke={GOLD} strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
-
-      {/* Entry label box (only on 5m panel) */}
-      {is5m ? (
-        <g>
-          <rect x={Math.max(pad, entryX - 60)} y={pad - 8} width={120} height={16} rx={3} fill="#d9a441" opacity="0.9" />
-          <text x={entryX} y={pad + 4} fill="#151109" fontSize="10" textAnchor="middle" fontWeight="bold">
-            {entryDateStr} @ {entryPrice !== null && entryPrice !== undefined ? entryPrice.toFixed(2) : "?"}
-          </text>
-        </g>
-      ) : null}
-
-      {/* ICT Overlay Zones (OB, FVG, Structure BOS/MSS) */}
-      {showZones && [...showZones.order_blocks, ...showZones.fvgs, ...showZones.structure].map((zone, i) => {
-        const yTop = y(Math.max(zone.top, zone.bottom));
-        const yBot = y(Math.min(zone.top, zone.bottom));
-        const zoneHeight = Math.max(1, yBot - yTop);
-        const zoneX = xByTime(zone.time);
-        let fillColor = ICT_PURPLE;
-        if (zone.kind === "fvg" || zone.kind === "ifvg") fillColor = ICT_CYAN;
-        if (zone.kind === "structure" || zone.kind === "BOS" || zone.kind === "MSS" || zone.kind === "CHoCH") fillColor = ICT_YELLOW;
-        return (
-          <g key={`zone-${tfKey}-${i}`}>
-            <rect x={zoneX} y={yTop} width={Math.max(3, (width - pad * 2) * 0.02)} height={zoneHeight} fill={fillColor} opacity="0.35" />
-            <text x={zoneX + 4} y={Math.max(10, yTop - 2)} fill={fillColor} fontSize="8" opacity="0.85">{zone.label}</text>
-          </g>
-        );
-      })}
-
-      {/* ICT Overlay Levels (Liquidity, Swings) */}
-      {showZones && [...showZones.liquidity, ...showZones.swings].map((level, i) => {
-        const ly = y(level.level);
-        const lx = xByTime(level.time);
-        let strokeColor = ICT_ORANGE;
-        if (level.kind === "swing") strokeColor = ICT_BLUE;
-        const side = level.side === "buyside" ? "↑" : level.side === "sellside" ? "↓" : "";
-        return (
-          <g key={`level-${tfKey}-${i}`}>
-            <line x1={lx} x2={width - pad} y1={ly} y2={ly} stroke={strokeColor} strokeWidth="0.8" strokeDasharray="3 3" opacity="0.6" />
-            <text x={Math.max(0, lx + 3)} y={Math.max(10, ly - 2)} fill={strokeColor} fontSize="8" opacity="0.9">
-              {side} {level.label}
-            </text>
-          </g>
-        );
-      })}
-
-      {/* Candles (only on 5m panel) */}
-      {is5m && candles.length > 0 ? (
-        <>
-          <g clipPath={`url(#afterEntry-${timeframeKey})`}>
-            {candles.map((candle, index) => {
-              if ((candle.time ?? 0) < entryTime) return null;
-              const up = candle.close >= candle.open;
-              const color = up ? GREEN : RED;
-              const cxp = xByTime(candle.time);
-              const top = y(Math.max(candle.open, candle.close));
-              const bodyHeight = Math.max(1, Math.abs(y(candle.open) - y(candle.close)));
-              const cw = Math.max(2, Math.min(10, (width - pad * 2) / candles.length * 0.65));
-              return (
-                <g key={`c-${index}`}>
-                  <line x1={cxp} x2={cxp} y1={y(candle.high)} y2={y(candle.low)} stroke={color} />
-                  <rect x={cxp - cw / 2} y={top} width={cw} height={bodyHeight} fill={color} opacity="0.85" />
-                </g>
-              );
-            })}
-          </g>
-          <g opacity="0.3">
-            {candles.map((candle, index) => {
-              if ((candle.time ?? 0) >= entryTime) return null;
-              const up = candle.close >= candle.open;
-              const color = up ? GREEN : RED;
-              const cxp = xByTime(candle.time);
-              const top = y(Math.max(candle.open, candle.close));
-              const bodyHeight = Math.max(1, Math.abs(y(candle.open) - y(candle.close)));
-              const cw = Math.max(2, Math.min(10, (width - pad * 2) / candles.length * 0.65));
-              return (
-                <g key={`cp-${index}`}>
-                  <line x1={cxp} x2={cxp} y1={y(candle.high)} y2={y(candle.low)} stroke={color} />
-                  <rect x={cxp - cw / 2} y={top} width={cw} height={bodyHeight} fill={color} opacity="0.5" />
-                </g>
-              );
-            })}
-          </g>
-          {/* Order lines (only on 5m panel) */}
-          {entryLine(entryPrice, GOLD, `Entry ${entryPrice?.toFixed(2)}`)}
-          {entryLine(data?.order?.stoploss, RED, `SL ${data?.order?.stoploss?.toFixed(2)}`)}
-          {entryLine(data?.order?.tp1, GREEN, `TP1 ${data?.order?.tp1?.toFixed(2)}`)}
-          {entryLine(data?.order?.tp2, GREEN, `TP2 ${data?.order?.tp2?.toFixed(2)}`, true)}
-          {entryLine(data?.order?.tp3, GREEN, `TP3 ${data?.order?.tp3?.toFixed(2)}`, true)}
-          {entryLine(data?.order?.close_price, BLUE, `Exit ${data?.order?.close_price?.toFixed(2)}`)}
-        </>
-      ) : null}
-    </svg>
-  );
 }
