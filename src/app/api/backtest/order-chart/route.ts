@@ -58,10 +58,23 @@ function mapLevel(o: ObjRow, kind: string) {
   };
 }
 
+function stepTable(step: number) {
+  if (step <= 600) return { table: "historical_candles_5m", stepSec: 300 };
+  if (step <= 7200) return { table: "historical_candles_1h", stepSec: 3600 };
+  return { table: "candles_1d", stepSec: 86400 };
+}
+
 export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
   const orderId = (sp.get("order_id") || "").trim();
   const target_no = [1, 2, 3].includes(Number(sp.get("target_no"))) ? Number(sp.get("target_no")) : 1;
+  // Optional explicit candle window (used by the chart to lazy-load older bars
+  // when the user pans/drag-scrolls to the left). When present we return only
+  // candles for that range and skip the heavy ICT overlay assembly.
+  const fromTsParam = Number(sp.get("from_ts"));
+  const toTsParam = Number(sp.get("to_ts"));
+  const stepParam = Number(sp.get("step")) || 300;
+  const candlesOnly = Number.isFinite(fromTsParam) && Number.isFinite(toTsParam) && fromTsParam > 0 && toTsParam > fromTsParam;
   if (!orderId) {
     return NextResponse.json({ success: false, error: "order_id required" }, { status: 400 });
   }
@@ -105,6 +118,25 @@ export async function GET(request: NextRequest) {
     }
     const o = orderRes.rows[0];
     const symbol = o.symbol as string;
+
+    // ----- Older-candle window fetch (lazy pan-left) --------------------------
+    if (candlesOnly) {
+      const { table: tbl, stepSec: st } = stepTable(stepParam);
+      const fromIso = new Date(fromTsParam * 1000).toISOString();
+      const toIso = new Date(toTsParam * 1000).toISOString();
+      const res = await pool.query(
+        `SELECT candle_ts, open_price, high_price, low_price, close_price, volume
+         FROM ${tbl}
+         WHERE (yahoo_symbol = $1 OR base_symbol = $1)
+           AND candle_ts >= $2::timestamptz AND candle_ts <= $3::timestamptz
+         ORDER BY candle_ts ASC LIMIT 3000`,
+        [symbol, fromIso, toIso],
+      );
+      const candles = res.rows
+        .map((r) => ({ time: epoch(r.candle_ts as string), open: num(r.open_price), high: num(r.high_price), low: num(r.low_price), close: num(r.close_price), volume: num(r.volume) }))
+        .filter((c) => c.time !== null && c.open !== null);
+      return NextResponse.json({ success: true, candles, window: { from: fromTsParam, to: toTsParam }, timeframe: st === 300 ? "5m" : st === 3600 ? "1h" : "1d" });
+    }
 
     const filledSec = epoch(o.filled_at) ?? 0;
     const closeSec = epoch(o.close_ts) ?? filledSec;

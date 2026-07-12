@@ -3,6 +3,7 @@
 import Image from "next/image";
 import {
   BarChart3,
+  BookOpen,
   Bot,
   CircleDollarSign,
   Clock3,
@@ -14,6 +15,9 @@ import {
   MonitorDot,
   Play,
   RadioTower,
+  CalendarDays,
+  Rows3,
+  ActivitySquare,
   Search,
   ShieldCheck,
   Sparkles,
@@ -24,11 +28,22 @@ import {
 import { FormEvent, useState } from "react";
 import BacktestDashboard from "./backtest-dashboard";
 import LiveOrders from "./live-orders";
+import StrategyWorkspace from "./strategy-workspace";
+import RealtimeOrdersDashboard from "./realtime-orders-dashboard";
+import MlInsights from "./ml-insights";
+import Blogs from "./blogs";
+import { BlogNavProvider } from "./blog-context";
+import type { TradePrefill } from "./trade-navigation";
 
-type Tab = "backtest" | "monitoring" | "live-orders" | "deployments";
+type Tab = "realtime-orders" | "tradezella" | "stonk" | "backtest" | "ml" | "blogs" | "monitoring" | "live-orders" | "deployments";
 
 const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: "realtime-orders", label: "Realtime Orders", icon: ActivitySquare },
+  { id: "tradezella", label: "Trade Journal", icon: CalendarDays },
+  { id: "stonk", label: "Stonk Ledger", icon: Rows3 },
   { id: "backtest", label: "Backtest", icon: BarChart3 },
+  { id: "ml", label: "Machine Learning", icon: Cpu },
+  { id: "blogs", label: "Strategy Blogs", icon: BookOpen },
   { id: "monitoring", label: "Monitoring", icon: MonitorDot },
   { id: "live-orders", label: "Live Orders", icon: RadioTower },
   { id: "deployments", label: "Deployments", icon: Play },
@@ -43,7 +58,19 @@ export default function TradingLanding() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
-  const [activeTab, setActiveTab] = useState<Tab>("backtest");
+  const [activeTab, setActiveTab] = useState<Tab>("realtime-orders");
+  const [selectedTrade, setSelectedTrade] = useState<TradePrefill | null>(null);
+  const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
+
+  function openTrade(trade: TradePrefill, destination: "tradezella" | "stonk") {
+    setSelectedTrade(trade);
+    setActiveTab(destination);
+  }
+
+  function openBlog(blogId: string) {
+    setSelectedBlogId(blogId);
+    setActiveTab("blogs");
+  }
 
   function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -57,6 +84,7 @@ export default function TradingLanding() {
 
   if (isAuthed) {
     return (
+      <BlogNavProvider openBlog={openBlog}>
       <main className="min-h-screen bg-[#080b10] text-[#f5f7fb]">
         <div className="flex min-h-screen">
           <aside className="hidden w-[248px] border-r border-white/10 bg-[#0d1118] px-4 py-5 lg:block">
@@ -141,7 +169,12 @@ export default function TradingLanding() {
             </div>
 
             <div className="flex-1 overflow-auto p-4 md:p-6">
+              {activeTab === "realtime-orders" ? <RealtimeOrdersDashboard onOpenTrade={openTrade} /> : null}
+              {activeTab === "tradezella" ? <StrategyWorkspace mode="tradezella" initialSelection={selectedTrade} /> : null}
+              {activeTab === "stonk" ? <StrategyWorkspace mode="stonk" initialSelection={selectedTrade} /> : null}
               {activeTab === "backtest" ? <BacktestDashboard /> : null}
+              {activeTab === "ml" ? <MlInsights /> : null}
+              {activeTab === "blogs" ? <Blogs selectedId={selectedBlogId} onSelect={setSelectedBlogId} /> : null}
               {activeTab === "monitoring" ? <MonitoringPanel /> : null}
               {activeTab === "live-orders" ? <LiveOrders /> : null}
               {activeTab === "deployments" ? <DeploymentsPanel /> : null}
@@ -149,6 +182,7 @@ export default function TradingLanding() {
           </section>
         </div>
       </main>
+      </BlogNavProvider>
     );
   }
 

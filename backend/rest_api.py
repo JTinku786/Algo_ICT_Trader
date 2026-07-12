@@ -844,6 +844,35 @@ def backtest_order_chart():
                 if not order:
                     return jsonify({"success": False, "error": "order not found"}), 404
 
+                # Older-candle window fetch (lazy pan-left): return only candles.
+                try:
+                    _from_ts = float(request.args.get("from_ts")) if request.args.get("from_ts") else None
+                except (TypeError, ValueError):
+                    _from_ts = None
+                try:
+                    _to_ts = float(request.args.get("to_ts")) if request.args.get("to_ts") else None
+                except (TypeError, ValueError):
+                    _to_ts = None
+                if _from_ts and _to_ts and _from_ts > 0 and _to_ts > _from_ts:
+                    _from_dt = datetime.fromtimestamp(_from_ts).isoformat()
+                    _to_dt = datetime.fromtimestamp(_to_ts).isoformat()
+                    cur.execute(
+                        """
+                        SELECT candle_ts, open_price, high_price, low_price, close_price
+                        FROM historical_candles_5m
+                        WHERE (yahoo_symbol = %s OR base_symbol = %s)
+                          AND candle_ts >= %s::timestamptz AND candle_ts <= %s::timestamptz
+                        ORDER BY candle_ts ASC LIMIT 3000
+                        """,
+                        [order["symbol"], order["symbol"], _from_dt, _to_dt],
+                    )
+                    older = [
+                        {"time": epoch_seconds(r["candle_ts"]), "open": num(r["open_price"]), "high": num(r["high_price"]), "low": num(r["low_price"]), "close": num(r["close_price"])}
+                        for r in cur.fetchall()
+                    ]
+                    older = [r for r in older if r["time"] is not None and r["open"] is not None]
+                    return jsonify({"success": True, "candles": older, "window": {"from": _from_ts, "to": _to_ts}, "timeframe": "5m"})
+
                 filled_sec = epoch_seconds(order["filled_at"]) or 0
                 close_sec = epoch_seconds(order["close_ts"]) or filled_sec
                 span = max(close_sec - filled_sec, 3600)
@@ -907,6 +936,241 @@ def backtest_order_chart():
             "exit": {"time": close_sec, "price": num(order["close_price"]), "outcome": "WIN" if is_win else "LOSS"},
         },
         "candles": candles,
+    })
+
+
+REALTIME_ROWS_SQL = """
+    SELECT
+      s.signal_hash, s.market, s.ticker, s.base_symbol, s.company_name,
+      s.exchange_timezone, s.direction, s.entry_datetime, s.entry_date,
+      s.strategy_id, s.strategy, s.strategy_key, s.entry_price AS signal_entry_price,
+      s.stoploss AS signal_stoploss, s.target_1, s.target_2, s.target_3, s.as_of_ts,
+      o.order_id, o.state, o.order_type, o.qty, o.entry_price, o.filled_price,
+      o.stoploss, o.tp1, o.tp2, o.tp3, o.filled_at, o.close_price, o.close_ts,
+      o.close_reason, o.updated_at
+    FROM realtime_production_ict_strategy_met_execution s
+    LEFT JOIN realtime_production_orders o ON o.signal_id = s.signal_hash
+    {where}
+    ORDER BY s.entry_datetime DESC NULLS LAST
+    LIMIT 10000
+"""
+
+
+@app.get("/api/realtime-analytics/rows")
+def realtime_analytics_rows():
+    """Raw realtime signal+order rows. The Next.js route performs the timezone-aware
+    aggregation on top of these rows, so all analytics logic stays in one place."""
+    if not require_api_token():
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+
+    market = (request.args.get("market") or "ALL").strip()
+    ticker = (request.args.get("ticker") or "ALL").strip().upper()
+    strategy = (request.args.get("strategy") or "ALL").strip().upper()
+    direction = (request.args.get("direction") or "ALL").strip().upper()
+    status = (request.args.get("status") or "ALL").strip().upper()
+
+    conditions = []
+    params = []
+    if market != "ALL":
+        conditions.append("LOWER(s.market) = LOWER(%s)")
+        params.append(market)
+    if ticker != "ALL":
+        conditions.append("UPPER(s.ticker) = UPPER(%s)")
+        params.append(ticker)
+    if strategy != "ALL":
+        conditions.append("UPPER(s.strategy_id) = UPPER(%s)")
+        params.append(strategy)
+    if direction != "ALL":
+        conditions.append("UPPER(s.direction) = UPPER(%s)")
+        params.append(direction)
+    if status == "OPEN":
+        conditions.append("o.state = 'OPEN'")
+    if status == "COMPLETED":
+        conditions.append("o.state LIKE 'CLOSED%%'")
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+    query = REALTIME_ROWS_SQL.format(where=where)
+
+    try:
+        with psycopg2.connect(**db_config()) as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(query, params)
+                rows = [serialize_row(row) for row in cur.fetchall()]
+    except Exception as exc:
+        return jsonify({"success": False, "error": str(exc)}), 500
+
+    return jsonify({"success": True, "rows": rows})
+
+
+EMPTY_OVERLAYS = {
+    "order_blocks": [], "fvgs": [], "liquidity": [], "swings": [], "structure": [], "bias": None,
+    "timeframe_5m": {}, "timeframe_15m": {}, "timeframe_30m": {}, "timeframe_1h": {},
+    "timeframe_daily": {}, "timeframe_weekly": {},
+}
+
+
+def _fetch_realtime_candles(cur, symbol, base, from_iso, to_iso):
+    cmap = {}
+    for table in ("candles_5m", "historical_candles_5m"):
+        try:
+            cur.execute(
+                f"""
+                SELECT candle_ts, open_price, high_price, low_price, close_price, volume
+                FROM {table}
+                WHERE (yahoo_symbol = %s OR base_symbol = %s OR yahoo_symbol = %s OR base_symbol = %s)
+                  AND candle_ts >= %s::timestamptz AND candle_ts <= %s::timestamptz
+                ORDER BY candle_ts ASC LIMIT 3000
+                """,
+                [symbol, base, symbol, base, from_iso, to_iso],
+            )
+            for row in cur.fetchall():
+                t = epoch_seconds(row["candle_ts"])
+                op = num(row["open_price"])
+                if t is None or op is None or t in cmap:
+                    continue
+                cmap[t] = {
+                    "time": t, "open": op, "high": num(row["high_price"]),
+                    "low": num(row["low_price"]), "close": num(row["close_price"]), "volume": num(row["volume"]),
+                }
+        except Exception:
+            continue
+    return [cmap[t] for t in sorted(cmap.keys())]
+
+
+@app.get("/api/realtime-analytics/order-chart")
+def realtime_order_chart():
+    if not require_api_token():
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+
+    order_id = (request.args.get("order_id") or "").strip()
+    signal_hash = (request.args.get("signal_hash") or "").strip()
+    target = target_no(request.args.get("target_no"))
+    try:
+        from_ts_v = float(request.args.get("from_ts")) if request.args.get("from_ts") else None
+    except (TypeError, ValueError):
+        from_ts_v = None
+    try:
+        to_ts_v = float(request.args.get("to_ts")) if request.args.get("to_ts") else None
+    except (TypeError, ValueError):
+        to_ts_v = None
+    candles_only = bool(from_ts_v and to_ts_v and from_ts_v > 0 and to_ts_v > from_ts_v)
+
+    if not order_id and not signal_hash:
+        return jsonify({"success": False, "error": "order_id or signal_hash required"}), 400
+
+    order_cols = (
+        "o.order_id, o.signal_id, o.symbol, o.market, o.direction, o.entry_price, o.filled_price, "
+        "o.stoploss, o.tp1, o.tp2, o.tp3, o.qty, o.filled_at, o.close_price, o.close_ts, o.close_reason, o.state"
+    )
+    try:
+        conn = psycopg2.connect(**db_config())
+        conn.autocommit = True
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        order = None
+        if order_id:
+            cur.execute(f"SELECT {order_cols} FROM realtime_production_orders o WHERE o.order_id = %s LIMIT 1", [order_id])
+            order = cur.fetchone()
+        if not order and signal_hash:
+            cur.execute(f"SELECT {order_cols} FROM realtime_production_orders o WHERE o.signal_id = %s ORDER BY o.updated_at DESC NULLS LAST LIMIT 1", [signal_hash])
+            order = cur.fetchone()
+
+        sig_id = (order["signal_id"] if order else None) or signal_hash
+        sig = None
+        if sig_id:
+            try:
+                cur.execute(
+                    """
+                    SELECT signal_hash, market, ticker, base_symbol, direction, entry_datetime,
+                           entry_price, stoploss, target_1, target_2, target_3
+                    FROM realtime_production_ict_strategy_met_execution WHERE signal_hash = %s LIMIT 1
+                    """,
+                    [sig_id],
+                )
+                sig = cur.fetchone()
+            except Exception:
+                sig = None
+
+        if not order and not sig:
+            cur.close(); conn.close()
+            return jsonify({"success": False, "error": "order or signal not found"}), 404
+
+        symbol = (order["symbol"] if order else None) or (sig["ticker"] if sig else None) or (sig["base_symbol"] if sig else None) or ""
+        base = (sig["base_symbol"] if sig else None) or symbol
+        market = (order["market"] if order else None) or (sig["market"] if sig else None) or ""
+        direction = (order["direction"] if order else None) or (sig["direction"] if sig else None)
+
+        entry_price = num(order["filled_price"]) if order else None
+        if entry_price is None and order:
+            entry_price = num(order["entry_price"])
+        if entry_price is None and sig:
+            entry_price = num(sig["entry_price"])
+        stoploss = (num(order["stoploss"]) if order else None)
+        if stoploss is None and sig:
+            stoploss = num(sig["stoploss"])
+        tp1 = (num(order["tp1"]) if order else None) or (num(sig["target_1"]) if sig else None)
+        tp2 = (num(order["tp2"]) if order else None) or (num(sig["target_2"]) if sig else None)
+        tp3 = (num(order["tp3"]) if order else None) or (num(sig["target_3"]) if sig else None)
+        close_price = num(order["close_price"]) if order else None
+        state = (order["state"] if order else None) or "SIGNAL_ONLY"
+        filled_at = (order["filled_at"] if order else None) or (sig["entry_datetime"] if sig else None)
+        close_ts = order["close_ts"] if order else None
+
+        filled_sec = epoch_seconds(filled_at) or 0
+        close_sec = epoch_seconds(close_ts) or int(datetime.now().timestamp())
+
+        if candles_only:
+            from_iso = datetime.fromtimestamp(from_ts_v).isoformat()
+            to_iso = datetime.fromtimestamp(to_ts_v).isoformat()
+            candles = _fetch_realtime_candles(cur, symbol, base, from_iso, to_iso)
+            cur.close(); conn.close()
+            return jsonify({"success": True, "candles": candles, "window": {"from": from_ts_v, "to": to_ts_v}, "timeframe": "5m"})
+
+        raw_span = max(close_sec - filled_sec, 3600)
+        pad = max(raw_span * 0.4, 24 * 300)
+        from_iso = datetime.fromtimestamp(filled_sec - pad).isoformat()
+        to_iso = datetime.fromtimestamp(close_sec + pad).isoformat()
+        candles = _fetch_realtime_candles(cur, symbol, base, from_iso, to_iso)
+        cur.close(); conn.close()
+    except Exception as exc:
+        return jsonify({"success": False, "error": str(exc)}), 500
+
+    dir_upper = (direction or "").upper()
+    risk_points = abs(entry_price - stoploss) if entry_price is not None and stoploss is not None else None
+    pnl_points = None
+    if entry_price is not None and close_price is not None:
+        pnl_points = (entry_price - close_price) if dir_upper == "SELL" else (close_price - entry_price)
+    realized_r = round2(pnl_points / risk_points) if risk_points and risk_points > 0 and pnl_points is not None else None
+    upper = state.upper()
+    if upper == "CLOSED_TP":
+        outcome = "WIN"
+    elif upper == "CLOSED_SL":
+        outcome = "LOSS"
+    elif upper.startswith("CLOSED"):
+        outcome = "UNKNOWN" if realized_r is None else ("WIN" if realized_r > 0 else "LOSS")
+    elif upper == "OPEN":
+        outcome = "OPEN"
+    else:
+        outcome = "SIGNAL_ONLY"
+
+    return jsonify({
+        "success": True,
+        "order": {
+            "order_id": str(order["order_id"]) if order and order["order_id"] else sig_id,
+            "symbol": symbol, "market": market, "direction": direction,
+            "entry_price": (num(order["entry_price"]) if order else None) or (num(sig["entry_price"]) if sig else None),
+            "filled_price": entry_price, "stoploss": stoploss, "tp1": tp1, "tp2": tp2, "tp3": tp3,
+            "filled_at": serialize_value(filled_at), "close_ts": serialize_value(close_ts),
+            "close_price": close_price, "close_reason": (order["close_reason"] if order else None),
+            "target_no": target, "realized_r": realized_r, "outcome": outcome,
+        },
+        "timeframe": "5m",
+        "markers": {
+            "entry": {"time": filled_sec, "price": entry_price},
+            "exit": {"time": close_sec, "price": close_price, "outcome": outcome},
+        },
+        "candles": candles,
+        "overlays": EMPTY_OVERLAYS,
+        "window": {"from": filled_sec - int(max(raw_span * 0.4, 24 * 300)), "to": close_sec + int(max(raw_span * 0.4, 24 * 300))},
     })
 
 
