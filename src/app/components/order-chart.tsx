@@ -112,14 +112,18 @@ function preferIfvgZones(zones: OverlayZone[]) {
     .filter((zone) => Number.isFinite(zone.top) && Number.isFinite(zone.bottom) && Number.isFinite(zone.time))
     .map((zone) => ({ ...zone, kind: normalizedFvgKind(zone) }))
     .sort((a, b) => a.time - b.time);
-  const ifvgs = normalized.filter((zone) => zone.kind === "ifvg");
-  const preferred = ifvgs.length ? ifvgs : normalized.filter((zone) => zone.kind === "fvg");
-  const deduplicated: OverlayZone[] = [];
-  for (const zone of [...preferred].sort((a, b) => b.time - a.time)) {
-    if (deduplicated.some((kept) => zonesRepresentSameArea(zone, kept))) continue;
-    deduplicated.push(zone);
+  const groups: OverlayZone[][] = [];
+  for (const zone of normalized) {
+    const group = groups.find((items) => items.some((item) => zonesRepresentSameArea(zone, item)));
+    if (group) group.push(zone);
+    else groups.push([zone]);
   }
-  return deduplicated.sort((a, b) => a.time - b.time);
+  return groups
+    .map((group) => {
+      const ifvgs = group.filter((zone) => zone.kind === "ifvg");
+      return [...(ifvgs.length ? ifvgs : group)].sort((a, b) => b.time - a.time)[0];
+    })
+    .sort((a, b) => a.time - b.time);
 }
 
 function spreadLabelYs(items: Array<{ id: string; anchorY: number }>, minY: number, maxY: number, preferredGap = 20) {
@@ -145,6 +149,56 @@ function spreadLabelYs(items: Array<{ id: string; anchorY: number }>, minY: numb
     }
   }
   for (const item of placed) result.set(item.id, item.y - item.anchorY);
+  return result;
+}
+
+function placeIctLabels(
+  items: Array<{ id: string; anchorX: number; anchorY: number; text: string }>,
+  minX: number,
+  maxX: number,
+  minY: number,
+  maxY: number,
+) {
+  const result = new Map<string, LabelOffset>();
+  const placed: Array<{ x: number; y: number; width: number; height: number }> = [];
+  for (const item of [...items].sort((a, b) => a.anchorX - b.anchorX || a.anchorY - b.anchorY)) {
+    const width = Math.max(30, item.text.length * 5.4 + 16);
+    const height = 16;
+    const lane = width + 12;
+    const candidates = [
+      { dx: 0, dy: 0 }, { dx: 0, dy: -20 }, { dx: 0, dy: 20 },
+      { dx: -lane, dy: 0 }, { dx: -lane, dy: -20 }, { dx: -lane, dy: 20 },
+      { dx: lane, dy: 0 }, { dx: lane, dy: -20 }, { dx: lane, dy: 20 },
+      { dx: -lane * 2, dy: 0 }, { dx: -lane * 2, dy: -20 }, { dx: -lane * 2, dy: 20 },
+      { dx: 0, dy: -40 }, { dx: 0, dy: 40 },
+    ];
+    let chosen = { x: clamp(item.anchorX, minX, Math.max(minX, maxX - width)), y: clamp(item.anchorY, minY, maxY) };
+    let found = false;
+    for (const candidate of candidates) {
+      const x = clamp(item.anchorX + candidate.dx, minX, Math.max(minX, maxX - width));
+      const y = clamp(item.anchorY + candidate.dy, minY, maxY);
+      const collides = placed.some((label) => x < label.x + label.width + 6 && x + width + 6 > label.x && y - height / 2 < label.y + label.height / 2 + 4 && y + height / 2 + 4 > label.y - label.height / 2);
+      if (!collides) {
+        chosen = { x, y };
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      for (let y = minY; y <= maxY && !found; y += 20) {
+        for (let x = minX; x <= Math.max(minX, maxX - width); x += lane) {
+          const collides = placed.some((label) => x < label.x + label.width + 6 && x + width + 6 > label.x && y - height / 2 < label.y + label.height / 2 + 4 && y + height / 2 + 4 > label.y - label.height / 2);
+          if (!collides) {
+            chosen = { x, y };
+            found = true;
+            break;
+          }
+        }
+      }
+    }
+    placed.push({ ...chosen, width, height });
+    result.set(item.id, { dx: chosen.x - item.anchorX, dy: chosen.y - item.anchorY });
+  }
   return result;
 }
 
@@ -400,7 +454,7 @@ function InteractiveChart({
   const beforeEntry = (t: number | null | undefined) => t === null || t === undefined || t <= entryTime + 600;
   const showZones = tfOverlays ? {
     order_blocks: (tfOverlays["order_blocks"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time)).sort((a, b) => a.time - b.time).slice(-2),
-    fvgs: preferIfvgZones((tfOverlays["fvgs"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time))).slice(-2),
+    fvgs: preferIfvgZones((tfOverlays["fvgs"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time))).slice(-4),
     structure: (tfOverlays["structure"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time)).sort((a, b) => a.time - b.time).slice(-2),
     liquidity: (tfOverlays["liquidity"] as OverlayLevel[] ?? []).filter((l) => beforeEntry(l.time)).sort((a, b) => a.time - b.time).slice(-2),
     swings: (tfOverlays["swings"] as OverlayLevel[] ?? []).filter((l) => beforeEntry(l.time)).sort((a, b) => a.time - b.time).slice(-2),
@@ -665,9 +719,9 @@ function InteractiveChart({
     ...boxItems.map((b) => ({ id: b.id, anchorX: b.x + 4, anchorY: Math.max(12, b.yTop - 4), color: b.color, text: b.label })),
     ...lineItems.map((l) => ({ id: l.id, anchorX: Math.max(pad, l.x + 3), anchorY: Math.max(10, l.y - 4), color: l.color, text: l.label })),
   ];
-  const ictAutoOffsets = spreadLabelYs(rawIctLabels, pad + 12, vbHeight - pad - 12, 20);
+  const ictAutoOffsets = placeIctLabels(rawIctLabels, pad + 6, Math.max(pad + 120, entryX - 8), pad + 12, vbHeight - pad - 12);
   const priceAutoOffsets = spreadLabelYs(priceLines.map((line) => ({ id: line.id, anchorY: y(line.price) })), pad + 10, vbHeight - pad - 10, 19);
-  const ictLabels = rawIctLabels.map((label) => ({ ...label, autoDy: ictAutoOffsets.get(label.id) ?? 0 }));
+  const ictLabels = rawIctLabels.map((label) => ({ ...label, autoOffset: ictAutoOffsets.get(label.id) ?? { dx: 0, dy: 0 } }));
 
   const isZoomed = view !== null;
 
@@ -792,7 +846,7 @@ function InteractiveChart({
 
           {/* ICT context labels — draggable */}
           {slotCount > 0 ? ictLabels.map((lbl) => (
-            <DraggableLabel key={lbl.id} id={lbl.id} anchorX={lbl.anchorX} anchorY={lbl.anchorY} color={lbl.color} text={lbl.text} offset={{ dx: labelOffsets[lbl.id]?.dx ?? 0, dy: lbl.autoDy + (labelOffsets[lbl.id]?.dy ?? 0) }} onStart={startLabelDrag} variant="ict" />
+            <DraggableLabel key={lbl.id} id={lbl.id} anchorX={lbl.anchorX} anchorY={lbl.anchorY} color={lbl.color} text={lbl.text} offset={{ dx: lbl.autoOffset.dx + (labelOffsets[lbl.id]?.dx ?? 0), dy: lbl.autoOffset.dy + (labelOffsets[lbl.id]?.dy ?? 0) }} onStart={startLabelDrag} variant="ict" />
           )) : null}
 
           {/* Price labels — draggable, anchored at the right axis */}
