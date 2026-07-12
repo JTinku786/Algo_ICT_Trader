@@ -91,10 +91,9 @@ function clamp(value: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, value));
 }
 
-function normalizedFvgKind(zone: OverlayZone) {
+function isIfvgZone(zone: OverlayZone) {
   const hint = `${zone.kind || ""} ${zone.label || ""}`.toLowerCase();
-  if (zone.broken || hint.includes("ifvg") || hint.includes("inverse fair value gap") || hint.includes("inverse_fvg")) return "ifvg";
-  return "fvg";
+  return zone.broken || hint.includes("ifvg") || hint.includes("inverse fair value gap") || hint.includes("inverse_fvg");
 }
 
 function zonesRepresentSameArea(a: OverlayZone, b: OverlayZone) {
@@ -107,22 +106,20 @@ function zonesRepresentSameArea(a: OverlayZone, b: OverlayZone) {
   return overlap / smallerHeight >= 0.55;
 }
 
-function preferIfvgZones(zones: OverlayZone[]) {
-  const normalized = zones
+function fvgOnlyZones(zones: OverlayZone[]) {
+  const fvgZones = zones
     .filter((zone) => Number.isFinite(zone.top) && Number.isFinite(zone.bottom) && Number.isFinite(zone.time))
-    .map((zone) => ({ ...zone, kind: normalizedFvgKind(zone) }))
+    .filter((zone) => !isIfvgZone(zone))
+    .map((zone) => ({ ...zone, kind: "fvg" }))
     .sort((a, b) => a.time - b.time);
   const groups: OverlayZone[][] = [];
-  for (const zone of normalized) {
+  for (const zone of fvgZones) {
     const group = groups.find((items) => items.some((item) => zonesRepresentSameArea(zone, item)));
     if (group) group.push(zone);
     else groups.push([zone]);
   }
   return groups
-    .map((group) => {
-      const ifvgs = group.filter((zone) => zone.kind === "ifvg");
-      return [...(ifvgs.length ? ifvgs : group)].sort((a, b) => b.time - a.time)[0];
-    })
+    .map((group) => [...group].sort((a, b) => b.time - a.time)[0])
     .sort((a, b) => a.time - b.time);
 }
 
@@ -291,7 +288,6 @@ export function OrderChart({
         <Legend color={GOLD} label="Entry" />
         <Legend color={RED} label="Stop" />
         <Legend color={GREEN} label="TPs" />
-        <Legend color="#4f46e5" label="IFVG" />
         <Legend color="#0284c7" label="FVG" />
         <Legend color="#9333ea" label="OB" />
         <Legend color="#2563eb" label="Liquidity / structure" />
@@ -454,7 +450,7 @@ function InteractiveChart({
   const beforeEntry = (t: number | null | undefined) => t === null || t === undefined || t <= entryTime + 600;
   const showZones = tfOverlays ? {
     order_blocks: (tfOverlays["order_blocks"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time)).sort((a, b) => a.time - b.time).slice(-2),
-    fvgs: preferIfvgZones((tfOverlays["fvgs"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time))).slice(-4),
+    fvgs: fvgOnlyZones((tfOverlays["fvgs"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time))).slice(-4),
     structure: (tfOverlays["structure"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time)).sort((a, b) => a.time - b.time).slice(-2),
     liquidity: (tfOverlays["liquidity"] as OverlayLevel[] ?? []).filter((l) => beforeEntry(l.time)).sort((a, b) => a.time - b.time).slice(-2),
     swings: (tfOverlays["swings"] as OverlayLevel[] ?? []).filter((l) => beforeEntry(l.time)).sort((a, b) => a.time - b.time).slice(-2),
@@ -689,17 +685,16 @@ function InteractiveChart({
     const zones = [...showZones.order_blocks, ...showZones.fvgs];
     zones.forEach((zone, index) => {
       const kind = zone.kind.toLowerCase();
-      const isIfvg = kind === "ifvg";
       const isFvg = kind === "fvg";
-      const color = isIfvg ? "#4f46e5" : isFvg ? "#0284c7" : "#9333ea";
+      const color = isFvg ? "#0284c7" : "#9333ea";
       boxItems.push({
         id: `box:${activeTf}:${kind}:${index}`,
         x: xByTime(zone.time),
         yTop: y(Math.max(zone.top, zone.bottom)),
         yBot: y(Math.min(zone.top, zone.bottom)),
         color,
-        label: isIfvg ? "IFVG" : isFvg ? "FVG" : "ORDER BLOCK",
-        opacity: isIfvg ? 0.18 : isFvg ? 0.11 : 0.1,
+        label: isFvg ? "FVG" : "ORDER BLOCK",
+        opacity: isFvg ? 0.11 : 0.1,
       });
     });
     const side = (value: string | null) => (value === "buyside" ? "↑" : value === "sellside" ? "↓" : "");
@@ -784,7 +779,7 @@ function InteractiveChart({
 
             {/* Order Blocks & FVGs — boxes extended from formation to the entry line */}
             {boxItems.map((b) => (
-              <rect key={b.id} x={b.x} y={b.yTop} width={Math.max(2, entryX - b.x)} height={Math.max(1, b.yBot - b.yTop)} fill={b.color} opacity={b.opacity} stroke={b.color} strokeWidth={b.label === "IFVG" ? 1.1 : 0.7} />
+              <rect key={b.id} x={b.x} y={b.yTop} width={Math.max(2, entryX - b.x)} height={Math.max(1, b.yBot - b.yTop)} fill={b.color} opacity={b.opacity} stroke={b.color} strokeWidth="0.7" />
             ))}
 
             {/* Structure / liquidity / swings — one clean horizontal line each */}
