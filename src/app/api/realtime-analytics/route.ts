@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPostgresPool, hasPostgresConfig } from "@/lib/db";
+import { getPostgresPool } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
     // timezone-aware aggregation below runs identically on either source.
     let rawRows: Record<string, unknown>[];
     const restApiUrl = process.env.CANDLES_REST_API_URL;
-    if (!hasPostgresConfig() && restApiUrl) {
+    if (restApiUrl) {
       const upstream = new URL("/api/realtime-analytics/rows", restApiUrl);
       for (const [key, value] of sp.entries()) upstream.searchParams.set(key, value);
       const upstreamResponse = await fetch(upstream, {

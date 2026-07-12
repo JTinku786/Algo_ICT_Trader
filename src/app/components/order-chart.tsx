@@ -91,6 +91,63 @@ function clamp(value: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, value));
 }
 
+function normalizedFvgKind(zone: OverlayZone) {
+  const hint = `${zone.kind || ""} ${zone.label || ""}`.toLowerCase();
+  if (zone.broken || hint.includes("ifvg") || hint.includes("inverse fair value gap") || hint.includes("inverse_fvg")) return "ifvg";
+  return "fvg";
+}
+
+function zonesRepresentSameArea(a: OverlayZone, b: OverlayZone) {
+  const aTop = Math.max(a.top, a.bottom);
+  const aBottom = Math.min(a.top, a.bottom);
+  const bTop = Math.max(b.top, b.bottom);
+  const bBottom = Math.min(b.top, b.bottom);
+  const overlap = Math.max(0, Math.min(aTop, bTop) - Math.max(aBottom, bBottom));
+  const smallerHeight = Math.max(Math.min(aTop - aBottom, bTop - bBottom), Number.EPSILON);
+  return overlap / smallerHeight >= 0.55;
+}
+
+function preferIfvgZones(zones: OverlayZone[]) {
+  const normalized = zones
+    .filter((zone) => Number.isFinite(zone.top) && Number.isFinite(zone.bottom) && Number.isFinite(zone.time))
+    .map((zone) => ({ ...zone, kind: normalizedFvgKind(zone) }))
+    .sort((a, b) => a.time - b.time);
+  const ifvgs = normalized.filter((zone) => zone.kind === "ifvg");
+  const preferred = ifvgs.length ? ifvgs : normalized.filter((zone) => zone.kind === "fvg");
+  const deduplicated: OverlayZone[] = [];
+  for (const zone of [...preferred].sort((a, b) => b.time - a.time)) {
+    if (deduplicated.some((kept) => zonesRepresentSameArea(zone, kept))) continue;
+    deduplicated.push(zone);
+  }
+  return deduplicated.sort((a, b) => a.time - b.time);
+}
+
+function spreadLabelYs(items: Array<{ id: string; anchorY: number }>, minY: number, maxY: number, preferredGap = 20) {
+  const result = new Map<string, number>();
+  if (!items.length) return result;
+  const gap = Math.min(preferredGap, Math.max(12, (maxY - minY) / Math.max(items.length - 1, 1)));
+  const placed = items
+    .map((item) => ({ ...item, y: clamp(item.anchorY, minY, maxY) }))
+    .sort((a, b) => a.y - b.y);
+  for (let index = 1; index < placed.length; index += 1) {
+    placed[index].y = Math.max(placed[index].y, placed[index - 1].y + gap);
+  }
+  if (placed.at(-1)!.y > maxY) {
+    placed[placed.length - 1].y = maxY;
+    for (let index = placed.length - 2; index >= 0; index -= 1) {
+      placed[index].y = Math.min(placed[index].y, placed[index + 1].y - gap);
+    }
+  }
+  if (placed[0].y < minY) {
+    placed[0].y = minY;
+    for (let index = 1; index < placed.length; index += 1) {
+      placed[index].y = Math.max(placed[index].y, placed[index - 1].y + gap);
+    }
+  }
+  for (const item of placed) result.set(item.id, item.y - item.anchorY);
+  return result;
+}
+
 const TF_ORDER: { key: TfKey; label: string; sec: number; overlayKey: string }[] = [
   { key: "5m", label: "5m", sec: 300, overlayKey: "timeframe_5m" },
   { key: "15m", label: "15m", sec: 900, overlayKey: "timeframe_15m" },
@@ -180,13 +237,16 @@ export function OrderChart({
         <Legend color={GOLD} label="Entry" />
         <Legend color={RED} label="Stop" />
         <Legend color={GREEN} label="TPs" />
-        <Legend color="#2563eb" label="ICT context" />
+        <Legend color="#4f46e5" label="IFVG" />
+        <Legend color="#0284c7" label="FVG" />
+        <Legend color="#9333ea" label="OB" />
+        <Legend color="#2563eb" label="Liquidity / structure" />
         {bias ? (
           <span className="ml-1 rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-white/80">
             W: <BiasBadge v={bias.weekly} /> | D: <BiasBadge v={bias.daily} /> | 1h: <BiasBadge v={bias.one_hour} />
           </span>
         ) : null}
-        <span className="ml-auto font-mono text-[10px] text-white/50">Scroll = zoom · drag = pan (left for history) · drag any label to move it</span>
+        <span className="ml-auto font-mono text-[10px] text-white/50">Labels auto-space · scroll to zoom · drag to pan or fine-tune labels</span>
         {r !== null ? <span className={cx("font-mono", r >= 0 ? "text-[#62d894]" : "text-[#ff8b91]")}>{r >= 0 ? "+" : ""}{fmt(r)}R</span> : null}
         <button onClick={onClose} className="grid size-6 place-items-center rounded border border-white/10 text-[#93a1b6] hover:text-white" title="Close chart"><X className="size-3.5" /></button>
       </div>
@@ -339,11 +399,11 @@ function InteractiveChart({
 
   const beforeEntry = (t: number | null | undefined) => t === null || t === undefined || t <= entryTime + 600;
   const showZones = tfOverlays ? {
-    order_blocks: (tfOverlays["order_blocks"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time)).slice(-3),
-    fvgs: (tfOverlays["fvgs"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time)).slice(-3),
-    structure: (tfOverlays["structure"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time)).slice(-3),
-    liquidity: (tfOverlays["liquidity"] as OverlayLevel[] ?? []).filter((l) => beforeEntry(l.time)).slice(-3),
-    swings: (tfOverlays["swings"] as OverlayLevel[] ?? []).filter((l) => beforeEntry(l.time)).slice(-3),
+    order_blocks: (tfOverlays["order_blocks"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time)).sort((a, b) => a.time - b.time).slice(-2),
+    fvgs: preferIfvgZones((tfOverlays["fvgs"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time))).slice(-2),
+    structure: (tfOverlays["structure"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time)).sort((a, b) => a.time - b.time).slice(-2),
+    liquidity: (tfOverlays["liquidity"] as OverlayLevel[] ?? []).filter((l) => beforeEntry(l.time)).sort((a, b) => a.time - b.time).slice(-2),
+    swings: (tfOverlays["swings"] as OverlayLevel[] ?? []).filter((l) => beforeEntry(l.time)).sort((a, b) => a.time - b.time).slice(-2),
   } : null;
 
   // ----- Price extremes over the visible window -----------------------------
@@ -385,7 +445,7 @@ function InteractiveChart({
     loadingOlderRef.current = true;
     setLoadingOlder(true);
     const earliest = baseCandles[0].time;
-    const chunk = baseStep * 500;
+    const chunk = baseStep * 1500;
     const fromTs = earliest - chunk;
     const toTs = earliest - baseStep;
     const url = `${endpoint}?${identifierParam}=${encodeURIComponent(identifier)}&target_no=${targetNo}&from_ts=${fromTs}&to_ts=${toTs}&step=${baseStep}`;
@@ -404,9 +464,12 @@ function InteractiveChart({
         const displayedAfter = activeTf === "5m" ? merged : aggregateCandles(merged, activeTfMeta.sec);
         const delta = displayedAfter.length - displayedBefore;
         if (delta > 0) {
+          // When panning while zoomed, keep the same bars in view (shift by the
+          // number of newly-prepended bars). When at full view, reveal the newly
+          // loaded older history on the left so the drag visibly goes back in time.
           setView((v) => (v
             ? { start: v.start + delta, end: v.end + delta }
-            : { start: delta, end: delta + Math.max(displayedBefore - 1, 0) }));
+            : { start: 0, end: Math.max(displayedBefore - 1, 0) }));
         }
       })
       .catch(() => { /* keep what we have */ })
@@ -483,7 +546,7 @@ function InteractiveChart({
     if (ne > lastIdx) { ns -= ne - lastIdx; ne = lastIdx; }
     ns = Math.max(0, ns);
     setView({ start: ns, end: ne });
-    if (ns <= 2.5) loadOlder();
+    if (ns <= 5) loadOlder();
   };
   const onSvgPointerUp = (event: React.PointerEvent<SVGSVGElement>) => {
     dragRef.current = null;
@@ -560,21 +623,51 @@ function InteractiveChart({
   pushLine("price:tp2", data?.order?.tp2, "#15803d", `TP2 ${data?.order?.tp2?.toFixed(2) ?? "?"}`, true);
   pushLine("price:tp3", data?.order?.tp3, "#15803d", `TP3 ${data?.order?.tp3?.toFixed(2) ?? "?"}`, true);
 
-  // ICT context labels (draggable). Anchor = where the concept sits on the chart.
-  type IctLabel = { id: string; anchorX: number; anchorY: number; color: string; text: string };
-  const ictLabels: IctLabel[] = [];
+  // ICT overlay geometry. Order Blocks & Fair Value Gaps render as boxes that
+  // extend from where they formed across to the entry. Structure (BOS/MSS/CHoCH),
+  // liquidity and swings render as single horizontal lines; near-equal levels are
+  // de-duplicated so there is one clean line each instead of a cluster.
+  type BoxItem = { id: string; x: number; yTop: number; yBot: number; color: string; label: string; opacity: number };
+  type LineItem = { id: string; x: number; y: number; color: string; label: string };
+  const boxItems: BoxItem[] = [];
+  const lineItems: LineItem[] = [];
   if (showZones) {
-    const zoneColor = (kind: string) => (kind === "fvg" || kind === "ifvg" ? "#2563eb" : kind === "structure" || kind === "BOS" || kind === "MSS" || kind === "CHoCH" ? "#1d4ed8" : "#7c3aed");
-    [...showZones.order_blocks, ...showZones.fvgs, ...showZones.structure].forEach((zone, i) => {
-      const yTop = y(Math.max(zone.top, zone.bottom));
-      ictLabels.push({ id: `zone:${activeTf}:${i}`, anchorX: xByTime(zone.time) + 4, anchorY: Math.max(12, yTop - 4), color: zoneColor(zone.kind), text: (zone.kind || "ZONE").toUpperCase() });
+    const zones = [...showZones.order_blocks, ...showZones.fvgs];
+    zones.forEach((zone, index) => {
+      const kind = zone.kind.toLowerCase();
+      const isIfvg = kind === "ifvg";
+      const isFvg = kind === "fvg";
+      const color = isIfvg ? "#4f46e5" : isFvg ? "#0284c7" : "#9333ea";
+      boxItems.push({
+        id: `box:${activeTf}:${kind}:${index}`,
+        x: xByTime(zone.time),
+        yTop: y(Math.max(zone.top, zone.bottom)),
+        yBot: y(Math.min(zone.top, zone.bottom)),
+        color,
+        label: isIfvg ? "IFVG" : isFvg ? "FVG" : "ORDER BLOCK",
+        opacity: isIfvg ? 0.18 : isFvg ? 0.11 : 0.1,
+      });
     });
-    [...showZones.liquidity, ...showZones.swings].forEach((level, i) => {
-      const strokeColor = level.kind === "swing" ? "#1e40af" : "#2563eb";
-      const side = level.side === "buyside" ? "↑" : level.side === "sellside" ? "↓" : "";
-      ictLabels.push({ id: `level:${activeTf}:${i}`, anchorX: xByTime(level.time) + 3, anchorY: Math.max(10, y(level.level) - 4), color: strokeColor, text: `${side} ${(level.kind || "LVL").toUpperCase()}`.trim() });
-    });
+    const side = (value: string | null) => (value === "buyside" ? "↑" : value === "sellside" ? "↓" : "");
+    const rawLines: { level: number; time: number; color: string; label: string; priority: number }[] = [];
+    for (const z of showZones.structure) rawLines.push({ level: (z.top + z.bottom) / 2, time: z.time, color: "#1d4ed8", label: (z.kind || "MSS").toUpperCase(), priority: 2 });
+    for (const l of showZones.liquidity) rawLines.push({ level: l.level, time: l.time, color: "#2563eb", label: `${side(l.side)} LIQUIDITY`.trim(), priority: 3 });
+    for (const l of showZones.swings) rawLines.push({ level: l.level, time: l.time, color: "#1e40af", label: `${side(l.side)} SWING`.trim(), priority: 1 });
+    const tol = priceRange * 0.004;
+    const kept: typeof rawLines = [];
+    for (const item of rawLines.filter((row) => Number.isFinite(row.level)).sort((a, b) => b.priority - a.priority || b.time - a.time)) {
+      if (kept.some((k) => Math.abs(k.level - item.level) <= tol)) continue;
+      kept.push(item);
+    }
+    kept.slice(0, 5).sort((a, b) => a.time - b.time).forEach((item, index) => lineItems.push({ id: `line:${activeTf}:${index}`, x: xByTime(item.time), y: y(item.level), color: item.color, label: item.label }));
   }
+  const rawIctLabels = [
+    ...boxItems.map((b) => ({ id: b.id, anchorX: b.x + 4, anchorY: Math.max(12, b.yTop - 4), color: b.color, text: b.label })),
+    ...lineItems.map((l) => ({ id: l.id, anchorX: Math.max(pad, l.x + 3), anchorY: Math.max(10, l.y - 4), color: l.color, text: l.label })),
+  ];
+  const ictAutoOffsets = spreadLabelYs(rawIctLabels, pad + 12, vbHeight - pad - 12, 20);
+  const priceAutoOffsets = spreadLabelYs(priceLines.map((line) => ({ id: line.id, anchorY: y(line.price) })), pad + 10, vbHeight - pad - 10, 19);
+  const ictLabels = rawIctLabels.map((label) => ({ ...label, autoDy: ictAutoOffsets.get(label.id) ?? 0 }));
 
   const isZoomed = view !== null;
 
@@ -635,22 +728,15 @@ function InteractiveChart({
           <g clipPath="url(#plot-order)">
             <line x1={entryX} x2={entryX} y1={pad} y2={vbHeight - pad} stroke="#b7791f" strokeWidth="1" strokeDasharray="3 4" opacity="0.75" />
 
-            {showZones && [...showZones.order_blocks, ...showZones.fvgs, ...showZones.structure].map((zone, i) => {
-              const yTop = y(Math.max(zone.top, zone.bottom));
-              const yBot = y(Math.min(zone.top, zone.bottom));
-              const zoneX = xByTime(zone.time);
-              let fillColor = "#7c3aed";
-              if (zone.kind === "fvg" || zone.kind === "ifvg") fillColor = "#2563eb";
-              if (zone.kind === "structure" || zone.kind === "BOS" || zone.kind === "MSS" || zone.kind === "CHoCH") fillColor = "#1d4ed8";
-              return <rect key={`zone-${i}`} x={zoneX} y={yTop} width={Math.max(8, (plotW / Math.max(span, 1)) * 2)} height={Math.max(1, yBot - yTop)} fill={fillColor} opacity="0.14" stroke={fillColor} strokeWidth="0.6" />;
-            })}
+            {/* Order Blocks & FVGs — boxes extended from formation to the entry line */}
+            {boxItems.map((b) => (
+              <rect key={b.id} x={b.x} y={b.yTop} width={Math.max(2, entryX - b.x)} height={Math.max(1, b.yBot - b.yTop)} fill={b.color} opacity={b.opacity} stroke={b.color} strokeWidth={b.label === "IFVG" ? 1.1 : 0.7} />
+            ))}
 
-            {showZones && [...showZones.liquidity, ...showZones.swings].map((level, i) => {
-              const ly = y(level.level);
-              const lx = xByTime(level.time);
-              const strokeColor = level.kind === "swing" ? "#1e40af" : "#2563eb";
-              return <line key={`level-${i}`} x1={lx} x2={Math.min(width - pad, lx + 140)} y1={ly} y2={ly} stroke={strokeColor} strokeWidth="0.8" strokeDasharray="4 4" opacity="0.6" />;
-            })}
+            {/* Structure / liquidity / swings — one clean horizontal line each */}
+            {lineItems.map((l) => (
+              <line key={l.id} x1={Math.max(pad, l.x)} x2={width - pad} y1={l.y} y2={l.y} stroke={l.color} strokeWidth="0.9" strokeDasharray="5 4" opacity="0.65" />
+            ))}
 
             {slotCount > 0 ? (
               <>
@@ -706,12 +792,12 @@ function InteractiveChart({
 
           {/* ICT context labels — draggable */}
           {slotCount > 0 ? ictLabels.map((lbl) => (
-            <DraggableLabel key={lbl.id} id={lbl.id} anchorX={lbl.anchorX} anchorY={lbl.anchorY} color={lbl.color} text={lbl.text} offset={labelOffsets[lbl.id] ?? { dx: 0, dy: 0 }} onStart={startLabelDrag} variant="ict" />
+            <DraggableLabel key={lbl.id} id={lbl.id} anchorX={lbl.anchorX} anchorY={lbl.anchorY} color={lbl.color} text={lbl.text} offset={{ dx: labelOffsets[lbl.id]?.dx ?? 0, dy: lbl.autoDy + (labelOffsets[lbl.id]?.dy ?? 0) }} onStart={startLabelDrag} variant="ict" />
           )) : null}
 
           {/* Price labels — draggable, anchored at the right axis */}
           {slotCount > 0 ? priceLines.map((line) => (
-            <DraggableLabel key={`lbl-${line.id}`} id={line.id} anchorX={width - pad} anchorY={y(line.price)} color={line.color} text={line.label} offset={labelOffsets[line.id] ?? { dx: 0, dy: 0 }} onStart={startLabelDrag} variant="price" />
+            <DraggableLabel key={`lbl-${line.id}`} id={line.id} anchorX={width - pad} anchorY={y(line.price)} color={line.color} text={line.label} offset={{ dx: labelOffsets[line.id]?.dx ?? 0, dy: (priceAutoOffsets.get(line.id) ?? 0) + (labelOffsets[line.id]?.dy ?? 0) }} onStart={startLabelDrag} variant="price" />
           )) : null}
         </svg>
       </div>
@@ -742,21 +828,25 @@ function DraggableLabel({
   onStart: (id: string, event: React.PointerEvent) => void;
   variant: "price" | "ict";
 }) {
-  const labelX = anchorX + (variant === "price" ? 8 : 0) + offset.dx;
-  const labelY = anchorY + offset.dy;
   const boxWidth = Math.max(variant === "price" ? 40 : 30, text.length * 5.4 + 16);
+  const labelX = anchorX + (variant === "price" ? -boxWidth - 8 : 0) + offset.dx;
+  const labelY = anchorY + offset.dy;
   const fontSize = variant === "price" ? 9.5 : 8.5;
+  const connectorX = variant === "price" ? labelX + boxWidth - 2 : labelX + 2;
+  const textX = variant === "price" ? labelX + 6 : labelX + 11;
 
   return (
     <g>
-      <line x1={anchorX} y1={anchorY} x2={labelX + 2} y2={labelY} stroke={color} strokeWidth="0.75" strokeDasharray="2 2" opacity="0.85" />
+      <line x1={anchorX} y1={anchorY} x2={connectorX} y2={labelY} stroke={color} strokeWidth="0.75" strokeDasharray="2 2" opacity="0.85" />
       <circle cx={anchorX} cy={anchorY} r="2" fill={color} />
       <g style={{ cursor: "grab" }} onPointerDown={(e) => onStart(id, e)}>
         {/* transparent, larger grab area */}
         <rect x={labelX - 2} y={labelY - 10} width={boxWidth + 6} height={20} fill="transparent" />
         <rect x={labelX} y={labelY - 8} width={boxWidth} height={16} rx={3} fill="#ffffff" stroke={color} strokeWidth="0.9" opacity="0.97" />
-        <polygon points={`${labelX + 3},${labelY - 3} ${labelX + 3},${labelY + 3} ${labelX + 7},${labelY}`} fill={color} />
-        <text x={labelX + 11} y={labelY + 3} fill={color} fontSize={fontSize} fontWeight="700">{text}</text>
+        {variant === "price"
+          ? <polygon points={`${labelX + boxWidth - 7},${labelY - 3} ${labelX + boxWidth - 7},${labelY + 3} ${labelX + boxWidth - 3},${labelY}`} fill={color} />
+          : <polygon points={`${labelX + 3},${labelY - 3} ${labelX + 3},${labelY + 3} ${labelX + 7},${labelY}`} fill={color} />}
+        <text x={textX} y={labelY + 3} fill={color} fontSize={fontSize} fontWeight="700">{text}</text>
       </g>
     </g>
   );
