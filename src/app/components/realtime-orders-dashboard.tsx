@@ -17,9 +17,10 @@ import {
   LoaderCircle,
   RefreshCw,
   Rows3,
+  ShieldAlert,
+  ShieldCheck,
   Target,
   TrendingDown,
-  TrendingUp,
   Workflow,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -49,6 +50,9 @@ type SeriesRow = { date: string; signals: number; buy: number; sell: number; net
 type MonthlyRow = { month: string; signals: number; wins: number; losses: number; net_r: number; win_rate_pct: number | null };
 type StrategyPerformance = { strategy_id: string; strategy_name: string; orders: number; outcomes: number; win_rate_pct: number | null; avg_win_r: number | null; net_r: number; max_drawdown_r: number; profit_factor: number | null; expectancy_r: number | null };
 type StrategyCoverage = { strategy_id: string; strategy_name: string; signals: number; buy: number; sell: number; tickers: number; avg_risk_points: number | null; share_pct: number };
+type WorkspaceMode = "execution" | "research";
+type DeployabilityStatus = "PROVISIONAL" | "WATCH" | "RESEARCH";
+type DeployabilityRow = StrategyPerformance & { score: number; status: DeployabilityStatus; gaps: string[] };
 
 type AnalyticsResponse = {
   success: boolean;
@@ -149,6 +153,7 @@ export default function RealtimeOrdersDashboard({ onOpenTrade }: Props) {
   const [periodMode, setPeriodMode] = useState<"daily" | "monthly">("daily");
   const [heatmapMode, setHeatmapMode] = useState<"daily" | "monthly">("daily");
   const [chartRow, setChartRow] = useState<FeedRow | null>(null);
+  const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>("execution");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -186,6 +191,12 @@ export default function RealtimeOrdersDashboard({ onOpenTrade }: Props) {
 
   const dailyOrMonthly = periodMode === "daily" ? data?.series?.daily ?? [] : data?.series?.monthly ?? [];
   const heatmapRows = heatmapMode === "daily" ? data?.series?.daily ?? [] : data?.series?.monthly ?? [];
+  const deployabilityRows = scoreDeployability(data?.strategy_performance ?? []);
+  const filterScope = describeFilterScope({ market, ticker, strategy, direction, status, dateFrom, dateTo });
+
+  const changeWorkspaceMode = (value: WorkspaceMode) => {
+    setWorkspaceMode(value);
+  };
 
   return (
     <section className="mx-auto max-w-[1680px] space-y-4">
@@ -196,7 +207,8 @@ export default function RealtimeOrdersDashboard({ onOpenTrade }: Props) {
             <h1 className="text-2xl font-semibold text-white md:text-3xl">Realtime ICT Orders</h1>
             <p className="mt-1 text-sm text-violet-100/60">Signals remain visible; performance is calculated only from persisted internal orders.</p>
           </div>
-          <div className="xl:ml-auto">
+          <div className="flex flex-col gap-2 xl:ml-auto xl:items-end">
+            <WorkspaceModeToggle value={workspaceMode} onChange={changeWorkspaceMode} />
             <div className="flex items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3 py-2 text-xs text-violet-100/70">
               <Clock3 className="size-4 text-violet-300" />
               {market === "ALL"
@@ -222,52 +234,58 @@ export default function RealtimeOrdersDashboard({ onOpenTrade }: Props) {
       {loading && !data ? <LoadingState /> : null}
 
       {data ? <>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {(data.counts?.latest_by_market ?? []).map((item) => <LatestDateCard key={item.market} item={item} />)}
-          <CountCard label="All filtered signals" value={data.counts?.signals ?? 0} note={`${data.counts?.orders ?? 0} linked orders`} icon={Workflow} />
-          <CountCard label="Open / Completed" value={data.counts?.open ?? 0} note={`${data.counts?.completed ?? 0} completed`} icon={Layers3} />
-        </div>
+        <DecisionSnapshot data={data} scope={filterScope} />
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
-          <Metric label="Signals" value={fmt(data.counts?.signals)} icon={Activity} tone="violet" />
-          <Metric label="Strategies" value={fmt(data.summary?.strategies)} icon={Layers3} tone="blue" />
-          <Metric label="Tickers" value={fmt(data.summary?.tickers)} icon={Rows3} tone="blue" />
-          <Metric label="BUY setups" value={fmt(data.summary?.buy_setups)} icon={ArrowUp} tone="green" />
-          <Metric label="SELL setups" value={fmt(data.summary?.sell_setups)} icon={ArrowDown} tone="red" />
-          <Metric label="Avg risk points" value={fmt(data.summary?.avg_risk_points)} icon={Target} tone="gold" />
-          <Metric label="Planned R:R" value={fmt(data.summary?.avg_planned_rr)} icon={Target} tone="gold" />
-          <Metric label="Win rate" value={fmt(data.summary?.win_rate_pct, "%")} icon={TrendingUp} tone="green" note={`n=${data.summary?.outcomes ?? 0}`} />
-          <Metric label="Profit factor" value={fmt(data.summary?.profit_factor)} icon={BarChart3} tone="green" />
-          <Metric label="Net result" value={fmt(data.summary?.net_r, "R")} icon={LineChart} tone={(data.summary?.net_r ?? 0) >= 0 ? "green" : "red"} />
-          <Metric label="Max drawdown" value={fmt(data.summary?.max_drawdown_r, "R")} icon={TrendingDown} tone="red" />
-          <Metric label="Sharpe" value={fmt(data.summary?.sharpe_daily_r)} icon={Activity} tone="blue" note="Daily realized R" />
-          <Metric label="BUY win rate" value={fmt(data.summary?.buy_win_rate_pct, "%")} icon={ArrowUp} tone="green" />
-          <Metric label="SELL win rate" value={fmt(data.summary?.sell_win_rate_pct, "%")} icon={ArrowDown} tone="red" />
-          <Metric label="Expectancy" value={fmt(data.summary?.expectancy_r, "R")} icon={Target} tone="violet" />
-        </div>
+        {workspaceMode === "execution" ? <>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {(data.counts?.latest_by_market ?? []).map((item) => <LatestDateCard key={item.market} item={item} />)}
+            <CountCard label="All filtered signals" value={data.counts?.signals ?? 0} note={`${data.counts?.orders ?? 0} linked orders`} icon={Workflow} />
+            <CountCard label="Open / Completed" value={data.counts?.open ?? 0} note={`${data.counts?.completed ?? 0} completed`} icon={Layers3} />
+          </div>
 
-        <FeedTable data={data} loading={loading} sort={sort} order={order} setSort={setSortColumn} pageSize={pageSize} setPageSize={(value) => { setPageSize(value); setPage(1); }} page={page} setPage={setPage} onOpenTrade={onOpenTrade} onOpenChart={setChartRow} activeChartKey={chartRow ? `${chartRow.signal_hash}-${chartRow.order_id ?? "signal"}` : null} />
+          <RiskGovernance data={data} />
 
-        {chartRow ? <OrderChartPanel row={chartRow} onClose={() => setChartRow(null)} /> : null}
+          <FeedTable data={data} loading={loading} sort={sort} order={order} setSort={setSortColumn} pageSize={pageSize} setPageSize={(value) => { setPageSize(value); setPage(1); }} page={page} setPage={setPage} onOpenTrade={onOpenTrade} onOpenChart={setChartRow} activeChartKey={chartRow ? `${chartRow.signal_hash}-${chartRow.order_id ?? "signal"}` : null} />
 
-        <div className="grid gap-4 xl:grid-cols-2">
-          <ChartCard title="Equity Curve" subtitle="Cumulative realized R · internal orders"><LineSeries rows={(data.series?.equity ?? []).map((row) => ({ label: row.date, value: row.equity_r }))} /></ChartCard>
-          <ChartCard title="Daily P&L" subtitle="Realized R · daily or monthly" action={<Toggle value={periodMode} onChange={setPeriodMode} options={["daily", "monthly"]} />}><BarSeries rows={dailyOrMonthly.map((row) => ({ label: "date" in row ? row.date : row.month, value: row.net_r }))} /></ChartCard>
-          <ChartCard title="Day-of-Week P&L" subtitle="Realized R by closing weekday"><BarSeries rows={(data.series?.weekdays ?? []).map((row) => ({ label: row.day, value: row.net_r }))} /></ChartCard>
-          <ChartCard title="Win RR Distribution" subtitle="Closed internal outcomes"><BarSeries rows={(data.series?.rr_distribution ?? []).map((row) => ({ label: row.label, value: row.count }))} neutral /></ChartCard>
-          <ChartCard title="Signal Volume by Day" subtitle="Only dates where signals were generated"><SignalVolume rows={data.series?.daily ?? []} /></ChartCard>
-          <ChartCard title="Win-Rate Heatmap" subtitle="Closed outcomes only" action={<Toggle value={heatmapMode} onChange={setHeatmapMode} options={["daily", "monthly"]} />}><Heatmap rows={heatmapRows.map((row) => ({ label: "date" in row ? row.date : row.month, value: row.win_rate_pct, n: row.wins + row.losses }))} /></ChartCard>
-        </div>
+          {chartRow ? <OrderChartPanel row={chartRow} onClose={() => setChartRow(null)} /> : null}
 
-        <div className="grid gap-4 xl:grid-cols-2">
-          <StrategyPerformanceTable rows={data.strategy_performance ?? []} />
-          <StrategyCoverageTable rows={data.strategy_coverage ?? []} />
-        </div>
-
-        <div className="grid gap-4 xl:grid-cols-2">
           <CompactLedger title="Open Trades" rows={data.open_orders ?? []} onOpenTrade={onOpenTrade} onOpenChart={setChartRow} />
+        </> : <>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+            <Metric label="Signals" value={fmt(data.counts?.signals)} icon={Activity} tone="violet" />
+            <Metric label="Strategies" value={fmt(data.summary?.strategies)} icon={Layers3} tone="blue" />
+            <Metric label="Tickers" value={fmt(data.summary?.tickers)} icon={Rows3} tone="blue" />
+            <Metric label="BUY setups" value={fmt(data.summary?.buy_setups)} icon={ArrowUp} tone="green" />
+            <Metric label="SELL setups" value={fmt(data.summary?.sell_setups)} icon={ArrowDown} tone="red" />
+            <Metric label="Avg risk points" value={fmt(data.summary?.avg_risk_points)} icon={Target} tone="gold" />
+            <Metric label="Planned R:R" value={fmt(data.summary?.avg_planned_rr)} icon={Target} tone="gold" />
+            <Metric label="Max drawdown" value={fmt(data.summary?.max_drawdown_r, "R")} icon={TrendingDown} tone="red" />
+            <Metric label="Sharpe" value={fmt(data.summary?.sharpe_daily_r)} icon={Activity} tone="blue" note="Daily realized R" />
+            <Metric label="BUY win rate" value={fmt(data.summary?.buy_win_rate_pct, "%")} icon={ArrowUp} tone="green" />
+            <Metric label="SELL win rate" value={fmt(data.summary?.sell_win_rate_pct, "%")} icon={ArrowDown} tone="red" />
+            <Metric label="Completed outcomes" value={fmt(data.summary?.outcomes)} icon={Rows3} tone="violet" />
+          </div>
+
+          <DeployabilityScorecard rows={deployabilityRows} />
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <ChartCard title="Equity Curve" subtitle="Cumulative realized R · internal orders"><LineSeries rows={(data.series?.equity ?? []).map((row) => ({ label: row.date, value: row.equity_r }))} /></ChartCard>
+            <ChartCard title="Daily P&L" subtitle="Realized R · daily or monthly" action={<Toggle value={periodMode} onChange={setPeriodMode} options={["daily", "monthly"]} />}><BarSeries rows={dailyOrMonthly.map((row) => ({ label: "date" in row ? row.date : row.month, value: row.net_r }))} /></ChartCard>
+            <ChartCard title="Day-of-Week P&L" subtitle="Realized R by closing weekday"><BarSeries rows={(data.series?.weekdays ?? []).map((row) => ({ label: row.day, value: row.net_r }))} /></ChartCard>
+            <ChartCard title="Win RR Distribution" subtitle="Closed internal outcomes"><BarSeries rows={(data.series?.rr_distribution ?? []).map((row) => ({ label: row.label, value: row.count }))} neutral /></ChartCard>
+            <ChartCard title="Signal Volume by Day" subtitle="Only dates where signals were generated"><SignalVolume rows={data.series?.daily ?? []} /></ChartCard>
+            <ChartCard title="Win-Rate Heatmap" subtitle="Closed outcomes only" action={<Toggle value={heatmapMode} onChange={setHeatmapMode} options={["daily", "monthly"]} />}><Heatmap rows={heatmapRows.map((row) => ({ label: "date" in row ? row.date : row.month, value: row.win_rate_pct, n: row.wins + row.losses }))} /></ChartCard>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <StrategyPerformanceTable rows={data.strategy_performance ?? []} />
+            <StrategyCoverageTable rows={data.strategy_coverage ?? []} />
+          </div>
+
           <CompactLedger title="Outcomes Ledger" rows={data.outcomes_ledger ?? []} onOpenTrade={onOpenTrade} onOpenChart={setChartRow} />
-        </div>
+
+          {chartRow ? <OrderChartPanel row={chartRow} onClose={() => setChartRow(null)} /> : null}
+        </>}
 
         <div className="rounded-xl border border-amber-300/15 bg-amber-300/[0.04] p-4 text-xs leading-5 text-amber-100/70">
           {(data.warnings ?? []).map((warning) => <div key={warning}>• {warning}</div>)}
@@ -275,6 +293,186 @@ export default function RealtimeOrdersDashboard({ onOpenTrade }: Props) {
       </> : null}
     </section>
   );
+}
+
+function WorkspaceModeToggle({ value, onChange }: { value: WorkspaceMode; onChange: (value: WorkspaceMode) => void }) {
+  return (
+    <div className="inline-flex rounded-lg border border-white/10 bg-black/25 p-1" aria-label="Realtime workspace mode">
+      {(["execution", "research"] as const).map((mode) => (
+        <button
+          key={mode}
+          type="button"
+          aria-pressed={value === mode}
+          onClick={() => onChange(mode)}
+          className={cx(
+            "rounded-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] transition",
+            value === mode ? "bg-violet-400/20 text-violet-100 shadow-sm" : "text-violet-100/45 hover:text-violet-100/80",
+          )}
+        >
+          {mode}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function describeFilterScope(filters: { market: string; ticker: string; strategy: string; direction: string; status: string; dateFrom: string; dateTo: string }) {
+  const parts = [
+    filters.market !== "ALL" ? filters.market : null,
+    filters.ticker !== "ALL" ? displayTicker(filters.ticker) : null,
+    filters.strategy !== "ALL" ? filters.strategy : null,
+    filters.direction !== "ALL" ? filters.direction : null,
+    filters.status !== "ALL" ? filters.status : null,
+    filters.dateFrom || filters.dateTo ? `${filters.dateFrom || "start"} to ${filters.dateTo || "latest"}` : null,
+  ].filter(Boolean);
+  return parts.length ? parts.join(" · ") : "All markets · all strategies · full available history";
+}
+
+function DecisionSnapshot({ data, scope }: { data: AnalyticsResponse; scope: string }) {
+  const summary = data.summary;
+  const items = [
+    { label: "Signals", value: fmt(data.counts?.signals), tone: "text-violet-200" },
+    { label: "Closed sample", value: `n=${summary?.outcomes ?? 0}`, tone: "text-white" },
+    { label: "Win rate", value: fmt(summary?.win_rate_pct, "%"), tone: "text-emerald-300" },
+    { label: "Profit factor", value: fmt(summary?.profit_factor), tone: "text-cyan-300" },
+    { label: "Net result", value: fmt(summary?.net_r, "R"), tone: (summary?.net_r ?? 0) >= 0 ? "text-emerald-300" : "text-rose-300" },
+    { label: "Expectancy", value: fmt(summary?.expectancy_r, "R"), tone: (summary?.expectancy_r ?? 0) >= 0 ? "text-violet-200" : "text-rose-300" },
+  ];
+
+  return (
+    <section className="overflow-hidden rounded-xl border border-violet-400/20 bg-[#101620]">
+      <div className="flex flex-col gap-1 border-b border-white/10 px-4 py-3 md:flex-row md:items-center">
+        <div>
+          <h2 className="text-sm font-semibold text-white">Filtered decision snapshot</h2>
+          <p className="mt-0.5 text-[10px] text-[#7f8ca3]">Every value below uses the same active filter population.</p>
+        </div>
+        <div className="font-mono text-[10px] text-violet-200/70 md:ml-auto">{scope}</div>
+      </div>
+      <div className="grid grid-cols-2 divide-x divide-y divide-white/5 sm:grid-cols-3 xl:grid-cols-6 xl:divide-y-0">
+        {items.map((item) => (
+          <div key={item.label} className="px-4 py-3">
+            <div className="text-[9px] font-semibold uppercase tracking-[0.13em] text-[#657187]">{item.label}</div>
+            <div className={cx("mt-1.5 font-mono text-lg font-bold", item.tone)}>{item.value}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function scoreDeployability(rows: StrategyPerformance[]): DeployabilityRow[] {
+  return rows.map((row) => {
+    const pf = row.profit_factor ?? 0;
+    const expectancy = row.expectancy_r ?? 0;
+    const drawdown = Math.abs(row.max_drawdown_r ?? 0);
+    const sampleScore = Math.min(row.outcomes / 30, 1) * 25;
+    const pfScore = Math.min(pf / 2, 1) * 25;
+    const expectancyScore = Math.min(Math.max(expectancy, 0) / 0.5, 1) * 25;
+    const drawdownScore = Math.max(0, 1 - drawdown / 15) * 25;
+    const score = Math.round(sampleScore + pfScore + expectancyScore + drawdownScore);
+    const gaps = [
+      row.outcomes < 20 ? `sample ${row.outcomes}/20` : null,
+      row.profit_factor === null ? "PF unavailable" : pf < 1.5 ? `PF ${fmt(pf)} < 1.5` : null,
+      row.expectancy_r === null ? "expectancy unavailable" : expectancy <= 0 ? `expectancy ${fmt(expectancy, "R")}` : null,
+      row.max_drawdown_r < -12 ? `DD ${fmt(row.max_drawdown_r, "R")}` : null,
+    ].filter((value): value is string => Boolean(value));
+    const status: DeployabilityStatus = row.outcomes >= 20 && pf >= 1.5 && expectancy > 0 && row.max_drawdown_r >= -12
+      ? "PROVISIONAL"
+      : row.outcomes >= 10 && pf >= 1 && expectancy >= 0 && row.max_drawdown_r >= -18
+        ? "WATCH"
+        : "RESEARCH";
+    return { ...row, score, status, gaps };
+  }).sort((a, b) => b.score - a.score);
+}
+
+function DeployabilityScorecard({ rows }: { rows: DeployabilityRow[] }) {
+  return (
+    <DataCard title="Strategy Deployability Scorecard" subtitle="Read-only triage from filtered internal orders · never an automated deployment authorization">
+      <table className="w-full min-w-[900px] text-left text-xs">
+        <thead>
+          <tr>{["Status", "Score", "Strategy", "Closed n", "PF", "Expectancy", "Max DD", "Evidence gaps"].map((label) => <th key={label} className="px-3 py-2 text-[#7f8ca3]">{label}</th>)}</tr>
+        </thead>
+        <tbody className="divide-y divide-white/5">
+          {rows.map((row) => <tr key={row.strategy_id}>
+            <td className="px-3 py-2"><DeployabilityBadge status={row.status} /></td>
+            <td className="px-3 py-2"><div className="flex items-center gap-2"><span className="w-7 font-mono font-bold text-white">{row.score}</span><div className="h-1.5 w-16 overflow-hidden rounded-full bg-white/5"><div className="h-full rounded-full bg-violet-400" style={{ width: `${row.score}%` }} /></div></div></td>
+            <td className="px-3 py-2"><StrategyLink code={row.strategy_id} label={row.strategy_id} className="font-mono font-bold text-violet-300" /><div className="max-w-48 truncate text-[9px] text-[#657187]">{row.strategy_name}</div></td>
+            <td className="px-3 py-2 font-mono">{row.outcomes}</td>
+            <td className="px-3 py-2 font-mono">{fmt(row.profit_factor)}</td>
+            <td className={cx("px-3 py-2 font-mono", (row.expectancy_r ?? 0) > 0 ? "text-emerald-300" : "text-rose-300")}>{fmt(row.expectancy_r, "R")}</td>
+            <td className="px-3 py-2 font-mono text-rose-300">{fmt(row.max_drawdown_r, "R")}</td>
+            <td className="max-w-72 px-3 py-2 text-[10px] text-[#93a1b6]">{row.gaps.length ? row.gaps.join(" · ") : "Threshold evidence present"}</td>
+          </tr>)}
+        </tbody>
+      </table>
+    </DataCard>
+  );
+}
+
+function DeployabilityBadge({ status }: { status: DeployabilityStatus }) {
+  const tone = status === "PROVISIONAL"
+    ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-300"
+    : status === "WATCH"
+      ? "border-amber-300/25 bg-amber-300/10 text-amber-200"
+      : "border-rose-400/25 bg-rose-400/10 text-rose-300";
+  return <span className={cx("inline-flex rounded border px-2 py-1 font-mono text-[9px] font-bold", tone)}>{status}</span>;
+}
+
+function RiskGovernance({ data }: { data: AnalyticsResponse }) {
+  const maxOpenRiskR = 5;
+  const maxStrategyOpenRiskR = 3;
+  const drawdownReviewR = -12;
+  const minProfitFactor = 1;
+  const minSample = 20;
+  const openOrders = data.open_orders ?? [];
+  const definedOpenRisk = openOrders.filter((row) => typeof row.risk_points === "number" && row.risk_points > 0).length;
+  const openRiskByStrategy = [...openOrders.reduce((groups, row) => {
+    if (typeof row.risk_points !== "number" || row.risk_points <= 0) return groups;
+    const strategyId = row.strategy_id || "UNKNOWN";
+    groups.set(strategyId, (groups.get(strategyId) ?? 0) + 1);
+    return groups;
+  }, new Map<string, number>()).entries()].sort((a, b) => b[1] - a[1]);
+  const strategyRiskBreach = openRiskByStrategy.some(([, risk]) => risk > maxStrategyOpenRiskR);
+  const outcomes = data.summary?.outcomes ?? 0;
+  const drawdown = data.summary?.max_drawdown_r ?? 0;
+  const profitFactor = data.summary?.profit_factor;
+  const enoughEvidence = outcomes >= minSample;
+  const reviewRequired = definedOpenRisk > maxOpenRiskR
+    || strategyRiskBreach
+    || drawdown < drawdownReviewR
+    || (enoughEvidence && profitFactor !== null && profitFactor !== undefined && profitFactor < minProfitFactor);
+  const guardrail = !enoughEvidence ? "SAMPLE REVIEW" : reviewRequired ? "RISK REVIEW" : "WITHIN REVIEW LIMITS";
+
+  return (
+    <section className="rounded-xl border border-amber-300/20 bg-gradient-to-r from-amber-300/[0.04] to-transparent p-4">
+      <div className="mb-3 flex flex-col gap-1 md:flex-row md:items-center">
+        <div className="flex items-center gap-2">
+          {reviewRequired || !enoughEvidence ? <ShieldAlert className="size-4 text-amber-300" /> : <ShieldCheck className="size-4 text-emerald-300" />}
+          <h2 className="text-sm font-semibold text-white">Read-only risk governance</h2>
+        </div>
+        <div className="text-[10px] text-[#7f8ca3] md:ml-auto">Provisional review policy · no execution controls are changed</div>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        <PolicyCard label="Open planned risk" value={`${definedOpenRisk}R / ${maxOpenRiskR}R`} note={`${openOrders.length - definedOpenRisk} open orders lack a complete entry/stop risk plan`} alert={definedOpenRisk > maxOpenRiskR} />
+        <PolicyCard label="Observed max DD" value={`${fmt(drawdown, "R")} / ${drawdownReviewR}R`} note="Filtered historical maximum, not current live drawdown" alert={drawdown < drawdownReviewR} />
+        <PolicyCard label="Profit-factor floor" value={`${fmt(profitFactor)} / ${minProfitFactor.toFixed(2)}`} note={enoughEvidence ? `Evaluated on n=${outcomes}` : `Needs n=${minSample}; current n=${outcomes}`} alert={!enoughEvidence || (profitFactor !== null && profitFactor !== undefined && profitFactor < minProfitFactor)} />
+        <PolicyCard label="Guardrail status" value={guardrail} note="Review signal only; broker fills and currency exposure remain required" alert={!enoughEvidence || reviewRequired} />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/5 pt-3">
+        <span className="mr-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#657187]">Open risk by strategy</span>
+        {openRiskByStrategy.length ? openRiskByStrategy.map(([strategyId, risk]) => (
+          <span key={strategyId} className={cx("rounded border px-2 py-1 font-mono text-[9px]", risk > maxStrategyOpenRiskR ? "border-amber-300/25 bg-amber-300/10 text-amber-200" : "border-white/10 bg-black/15 text-[#b9c4d6]")}>
+            {strategyId} {risk}R
+          </span>
+        )) : <span className="text-[10px] text-[#7f8ca3]">No open orders with a complete risk plan.</span>}
+        <span className="ml-auto text-[9px] text-[#657187]">Review threshold: {maxStrategyOpenRiskR}R per strategy</span>
+      </div>
+    </section>
+  );
+}
+
+function PolicyCard({ label, value, note, alert }: { label: string; value: string; note: string; alert: boolean }) {
+  return <div className={cx("rounded-lg border p-3", alert ? "border-amber-300/25 bg-amber-300/[0.06]" : "border-white/10 bg-black/15")}><div className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#657187]">{label}</div><div className={cx("mt-2 font-mono text-base font-bold", alert ? "text-amber-200" : "text-emerald-300")}>{value}</div><div className="mt-1 text-[9px] leading-4 text-[#7f8ca3]">{note}</div></div>;
 }
 
 function FeedTable({ data, loading, sort, order, setSort, pageSize, setPageSize, page, setPage, onOpenTrade, onOpenChart, activeChartKey }: { data: AnalyticsResponse; loading: boolean; sort: string; order: "asc" | "desc"; setSort: (column: string) => void; pageSize: number; setPageSize: (value: number) => void; page: number; setPage: (value: number) => void; onOpenTrade: Props["onOpenTrade"]; onOpenChart: (row: FeedRow) => void; activeChartKey: string | null }) {
@@ -358,7 +556,7 @@ function CompactLedger({ title, rows, onOpenTrade, onOpenChart }: { title: strin
 
 function OutcomeBadge({ value }: { value: string }) { const v=value.toUpperCase(); const tone=v==="WIN"?"bg-emerald-400/10 text-emerald-300":v==="LOSS"?"bg-rose-400/10 text-rose-300":v==="OPEN"?"bg-cyan-400/10 text-cyan-300":"bg-white/5 text-[#93a1b6]"; return <span className={cx("rounded px-2 py-1 font-mono text-[9px] font-bold",tone)}>{value}</span>; }
 function OpenButton({ label, onClick, icon: Icon = ExternalLink }: { label: string; onClick: (event?: React.MouseEvent) => void; icon?: React.ComponentType<{ className?: string }> }) { return <button onClick={(event) => onClick(event)} className="flex items-center gap-1 rounded border border-white/10 px-2 py-1 text-[9px] text-[#b9c4d6] hover:border-violet-400/40 hover:text-violet-200">{label}<Icon className="size-2.5" /></button>; }
-function Select({ label, value, options, onChange, formatOption = (option) => option }: { label: string; value: string; options: string[]; onChange: (value: string) => void; formatOption?: (option: string) => string }) { return <label className="block"><span className="mb-1 block text-[9px] font-semibold uppercase tracking-wider text-[#657187]">{label}</span><select value={value} onChange={(event)=>onChange(event.target.value)} className="h-8 w-full rounded-md border border-white/10 bg-[#0b0f16] px-2 text-xs text-white outline-none focus:border-violet-400/50">{[...new Set(options)].map((option)=><option key={option} value={option}>{formatOption(option)}</option>)}</select></label>; }
-function DateField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) { return <label className="block"><span className="mb-1 block text-[9px] font-semibold uppercase tracking-wider text-[#657187]">{label}</span><input type="date" value={value} onChange={(event)=>onChange(event.target.value)} className="h-8 w-full rounded-md border border-white/10 bg-[#0b0f16] px-2 text-xs text-white outline-none focus:border-violet-400/50" /></label>; }
+function Select({ label, value, options, onChange, formatOption = (option) => option }: { label: string; value: string; options: string[]; onChange: (value: string) => void; formatOption?: (option: string) => string }) { return <label className="block"><span className="mb-1 block text-[9px] font-semibold uppercase tracking-wider text-[#657187]">{label}</span><select aria-label={label} value={value} onChange={(event)=>onChange(event.target.value)} className="h-8 w-full rounded-md border border-white/10 bg-[#0b0f16] px-2 text-xs text-white outline-none focus:border-violet-400/50">{[...new Set(options)].map((option)=><option key={option} value={option}>{formatOption(option)}</option>)}</select></label>; }
+function DateField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) { return <label className="block"><span className="mb-1 block text-[9px] font-semibold uppercase tracking-wider text-[#657187]">{label}</span><input aria-label={label} type="date" value={value} onChange={(event)=>onChange(event.target.value)} className="h-8 w-full rounded-md border border-white/10 bg-[#0b0f16] px-2 text-xs text-white outline-none focus:border-violet-400/50" /></label>; }
 function LoadingState() { return <div className="grid min-h-80 place-items-center rounded-xl border border-white/10 bg-[#101620]"><div className="text-center text-sm text-[#93a1b6]"><LoaderCircle className="mx-auto mb-3 size-8 animate-spin text-violet-300" />Loading realtime signals and orders…</div></div>; }
 function ErrorState({ message, retry }: { message: string; retry: () => Promise<void> }) { return <div className="flex items-center gap-3 rounded-xl border border-rose-400/20 bg-rose-400/[0.06] p-4 text-sm text-rose-200"><CircleAlert className="size-5 shrink-0" /><div><div className="font-semibold">Realtime analytics unavailable</div><div className="mt-1 text-xs text-rose-200/70">{message}</div></div><button onClick={()=>void retry()} className="ml-auto rounded-md border border-rose-300/20 px-3 py-2 text-xs">Retry</button></div>; }
