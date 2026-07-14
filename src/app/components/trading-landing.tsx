@@ -20,6 +20,7 @@ import {
   ActivitySquare,
   Search,
   ShieldCheck,
+  SlidersHorizontal,
   Sparkles,
   TrendingUp,
   WalletCards,
@@ -30,15 +31,17 @@ import BacktestDashboard from "./backtest-dashboard";
 import LiveOrders from "./live-orders";
 import StrategyWorkspace from "./strategy-workspace";
 import RealtimeOrdersDashboard from "./realtime-orders-dashboard";
+import SictStrategyBuilder from "./sict-strategy-builder";
 import MlInsights from "./ml-insights";
 import Blogs from "./blogs";
 import { BlogNavProvider } from "./blog-context";
 import type { TradePrefill } from "./trade-navigation";
 
-type Tab = "realtime-orders" | "tradezella" | "stonk" | "backtest" | "ml" | "blogs" | "monitoring" | "live-orders" | "deployments";
+type Tab = "realtime-orders" | "strategy-builder" | "tradezella" | "stonk" | "backtest" | "ml" | "blogs" | "monitoring" | "live-orders" | "deployments";
 
 const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "realtime-orders", label: "Realtime Orders", icon: ActivitySquare },
+  { id: "strategy-builder", label: "Strategy Builder", icon: SlidersHorizontal },
   { id: "tradezella", label: "Trade Journal", icon: CalendarDays },
   { id: "stonk", label: "Stonk Ledger", icon: Rows3 },
   { id: "backtest", label: "Backtest", icon: BarChart3 },
@@ -170,6 +173,7 @@ export default function TradingLanding() {
 
             <div className="flex-1 overflow-auto p-4 md:p-6">
               {activeTab === "realtime-orders" ? <RealtimeOrdersDashboard onOpenTrade={openTrade} /> : null}
+              {activeTab === "strategy-builder" ? <SictStrategyBuilder onOpenBacktest={() => setActiveTab("backtest")} /> : null}
               {activeTab === "tradezella" ? <StrategyWorkspace mode="tradezella" initialSelection={selectedTrade} /> : null}
               {activeTab === "stonk" ? <StrategyWorkspace mode="stonk" initialSelection={selectedTrade} /> : null}
               {activeTab === "backtest" ? <BacktestDashboard /> : null}
