@@ -26,10 +26,23 @@ import {
 import { useMemo, useState } from "react";
 
 type Direction = "BUY" | "SELL";
-type Market = "us" | "forex";
+type Market = "us" | "forex" | "india";
 type OutputTarget = "updated" | "production_ready";
 type EntryMode = "conservative" | "both";
 type OutputView = "powershell" | "json" | "wiring";
+type UniverseId = "custom" | "sp500" | "forex_top_10" | "india_indices";
+
+type UniversePreset = {
+  id: Exclude<UniverseId, "custom">;
+  label: string;
+  market: Market;
+  symbols: readonly string[];
+  yfinanceSymbols: readonly string[];
+  timezone: string;
+  session: string;
+  note: string;
+  runnerSupport: "direct" | "adapter_required";
+};
 
 type BuilderConfig = {
   market: Market;
@@ -73,6 +86,48 @@ const DEFAULT_CONFIG: BuilderConfig = {
   minSampleTrades: 100,
   minProfitFactor: 1.5,
   maxDrawdownR: 8,
+};
+
+const UNIVERSE_PRESETS: readonly UniversePreset[] = [
+  {
+    id: "sp500",
+    label: "S&P 500",
+    market: "us",
+    symbols: ["^GSPC"],
+    yfinanceSymbols: ["^GSPC"],
+    timezone: "America/New_York",
+    session: "US RTH · New York",
+    note: "Index-level S-ICT research setup.",
+    runnerSupport: "direct",
+  },
+  {
+    id: "forex_top_10",
+    label: "Forex · Top 10",
+    market: "forex",
+    symbols: ["^EURUSD", "^GBPUSD", "^USDJPY", "^USDCHF", "^USDCAD", "^AUDUSD", "^NZDUSD", "^EURGBP", "^EURJPY", "^GBPJPY"],
+    yfinanceSymbols: ["EURUSD=X", "GBPUSD=X", "JPY=X", "CHF=X", "CAD=X", "AUDUSD=X", "NZDUSD=X", "EURGBP=X", "EURJPY=X", "GBPJPY=X"],
+    timezone: "America/New_York",
+    session: "London + New York",
+    note: "Existing system major and cross-pair universe.",
+    runnerSupport: "direct",
+  },
+  {
+    id: "india_indices",
+    label: "NIFTY + BANKNIFTY",
+    market: "india",
+    symbols: ["^NSEI", "^NSEBANK"],
+    yfinanceSymbols: ["^NSEI", "^NSEBANK"],
+    timezone: "Asia/Kolkata",
+    session: "NSE cash · IST",
+    note: "India index setup with the same 30M → 5M S-ICT contract.",
+    runnerSupport: "adapter_required",
+  },
+] as const;
+
+const MARKET_METADATA: Record<Market, { timezone: string; session: string }> = {
+  us: { timezone: "America/New_York", session: "US RTH · New York" },
+  forex: { timezone: "America/New_York", session: "London + New York" },
+  india: { timezone: "Asia/Kolkata", session: "NSE cash · IST" },
 };
 
 const CANDLES = [
@@ -236,6 +291,7 @@ function SetupPreview({ direction }: { direction: Direction }) {
 
 export default function SictStrategyBuilder({ onOpenBacktest }: { onOpenBacktest: () => void }) {
   const [config, setConfig] = useState<BuilderConfig>(DEFAULT_CONFIG);
+  const [selectedUniverse, setSelectedUniverse] = useState<UniverseId>("custom");
   const [direction, setDirection] = useState<Direction>("BUY");
   const [outputView, setOutputView] = useState<OutputView>("powershell");
   const [preflightRun, setPreflightRun] = useState(false);
@@ -243,11 +299,27 @@ export default function SictStrategyBuilder({ onOpenBacktest }: { onOpenBacktest
 
   function updateConfig<K extends keyof BuilderConfig>(key: K, value: BuilderConfig[K]) {
     setConfig((current) => ({ ...current, [key]: value }));
+    if (key === "market" || key === "symbols") setSelectedUniverse("custom");
     setPreflightRun(false);
     setNotice("");
   }
 
+  function applyUniverse(preset: UniversePreset) {
+    setConfig((current) => ({
+      ...current,
+      market: preset.market,
+      symbols: preset.symbols.join(", "),
+      productionAcknowledged: false,
+    }));
+    setSelectedUniverse(preset.id);
+    setPreflightRun(false);
+    setNotice(`${preset.label} universe loaded with ${preset.timezone} market time.`);
+  }
+
   const symbols = useMemo(() => normalizeSymbols(config.symbols), [config.symbols]);
+  const activePreset = useMemo(() => UNIVERSE_PRESETS.find((preset) => preset.id === selectedUniverse) ?? null, [selectedUniverse]);
+  const marketMetadata = activePreset ?? MARKET_METADATA[config.market];
+  const runnerSupported = activePreset?.runnerSupport !== "adapter_required" && config.market !== "india";
   const blockers = useMemo(() => {
     const items: string[] = [];
     if (symbols.length === 0) items.push("Add at least one symbol.");
@@ -259,6 +331,7 @@ export default function SictStrategyBuilder({ onOpenBacktest }: { onOpenBacktest
     if (config.minSampleTrades < 30) items.push("Promotion sample must contain at least 30 completed trades.");
     if (config.minProfitFactor < 1) items.push("Promotion profit factor must be at least 1.0.");
     if (config.maxDrawdownR <= 0) items.push("Maximum drawdown policy must be greater than 0R.");
+    if (config.market === "india") items.push("The India S-ICT historical adapter is not connected yet; export the preset for implementation review before execution.");
     return items;
   }, [config, symbols]);
 
@@ -267,8 +340,10 @@ export default function SictStrategyBuilder({ onOpenBacktest }: { onOpenBacktest
     if (!config.requireSweep) items.push("Sweep is disabled as a research override; this weakens the approved S-ICT contract.");
     if (config.entryMode === "both") items.push("Research mode also evaluates iFVG entries. The website chart remains FVG-only.");
     if (config.market === "forex") items.push("Confirm that the selected Forex symbols exist in the historical data source before running.");
+    if (config.market === "us" && symbols.some((symbol) => symbol.startsWith("^"))) items.push("Index symbols require matching candles in the historical store; the yfinance alias is included in the exported JSON.");
+    if (config.market === "india") items.push("India uses Asia/Kolkata session boundaries. The current S-ICT historical runner accepts only US and Forex.");
     return items;
-  }, [config.entryMode, config.market, config.requireSweep]);
+  }, [config.entryMode, config.market, config.requireSweep, symbols]);
 
   const rules: Rule[] = useMemo(
     () => [
@@ -287,11 +362,20 @@ export default function SictStrategyBuilder({ onOpenBacktest }: { onOpenBacktest
 
   const generatedConfig = useMemo(
     () => ({
-      schema_version: "sict.ui.v3",
+      schema_version: "sict.ui.v4",
       strategy_id: "S-ICT",
       family: "s21_s33",
       market: config.market,
       symbols,
+      universe: {
+        id: selectedUniverse,
+        label: activePreset?.label ?? "Custom universe",
+        timezone: marketMetadata.timezone,
+        session: marketMetadata.session,
+        system_symbols: symbols,
+        yfinance_symbols: activePreset?.yfinanceSymbols ?? symbols,
+        historical_runner_support: runnerSupported ? "direct" : "adapter_required",
+      },
       date_range: { start: config.startDate, end: config.endDate },
       output_target: config.outputTarget,
       runner: { workers: config.workers, no_resume: true, include_orders: true },
@@ -327,26 +411,39 @@ export default function SictStrategyBuilder({ onOpenBacktest }: { onOpenBacktest
         requires_walk_forward_validation: true,
       },
     }),
-    [config, symbols],
+    [activePreset, config, marketMetadata.session, marketMetadata.timezone, runnerSupported, selectedUniverse, symbols],
   );
 
   const jsonOutput = useMemo(() => JSON.stringify(generatedConfig, null, 2), [generatedConfig]);
-  const powershellOutput = useMemo(
-    () => [
+  const powershellOutput = useMemo(() => {
+    const environment = [
       `$env:ICT_OUTPUT_TARGET = "${config.outputTarget}"`,
       `$env:ICT_S21S33_STRATEGIES = "S-ICT"`,
       `$env:ICT_SICT_REQUIRE_SWEEP = "${config.requireSweep ? "1" : "0"}"`,
       `$env:ICT_SICT_RETURN_WINDOW_BARS = "${config.returnWindowBars}"`,
       `$env:ICT_SICT_ENTRY_MODE = "${config.entryMode}"`,
       "",
+    ];
+    if (!runnerSupported) {
+      return [
+        ...environment,
+        "# India preset exported successfully.",
+        "# Execution intentionally blocked: run_updated_backtest.py currently accepts only us and forex.",
+        `# Required adapter: S-ICT 30M → 5M using ${symbols.join(",")} in Asia/Kolkata.`,
+      ].join("\n");
+    }
+    return [
+      ...environment,
       `python .\\run_updated_backtest.py --market ${config.market} --start_date ${config.startDate} --end_date ${config.endDate} \``,
       `  --families s21_s33 --symbols ${symbols.join(",")} --workers ${config.workers} --no-resume`,
-    ].join("\n"),
-    [config, symbols],
-  );
+    ].join("\n");
+  }, [config, runnerSupported, symbols]);
   const wiringOutput = [
-    "CONNECTED TO BACKEND",
-    "• Market, symbols, date range, workers → run_updated_backtest.py CLI",
+    runnerSupported ? "CONNECTED TO HISTORICAL RUNNER" : "CONFIGURATION CONNECTED · EXECUTION ADAPTER REQUIRED",
+    `• Universe → ${activePreset?.label ?? "Custom"} (${marketMetadata.timezone})`,
+    runnerSupported
+      ? "• Market, symbols, date range, workers → run_updated_backtest.py CLI"
+      : "• India symbols and IST session → exported configuration; no invalid command is emitted",
     "• Output target → ICT_OUTPUT_TARGET",
     "• Strategy selection → ICT_S21S33_STRATEGIES=S-ICT",
     "• HTF sweep gate → ICT_SICT_REQUIRE_SWEEP",
@@ -399,6 +496,7 @@ export default function SictStrategyBuilder({ onOpenBacktest }: { onOpenBacktest
     try {
       const parsed = JSON.parse(raw) as Partial<BuilderConfig>;
       setConfig({ ...DEFAULT_CONFIG, ...parsed });
+      setSelectedUniverse("custom");
       setPreflightRun(false);
       setNotice("Saved draft loaded.");
     } catch {
@@ -408,6 +506,7 @@ export default function SictStrategyBuilder({ onOpenBacktest }: { onOpenBacktest
 
   function resetBuilder() {
     setConfig(DEFAULT_CONFIG);
+    setSelectedUniverse("custom");
     setDirection("BUY");
     setOutputView("powershell");
     setPreflightRun(false);
@@ -447,45 +546,80 @@ export default function SictStrategyBuilder({ onOpenBacktest }: { onOpenBacktest
         <MetricCard label="Output" value={config.outputTarget === "updated" ? "Scratch tables" : "Production-ready"} note={config.outputTarget === "updated" ? "Safe A/B research destination" : "Protected destination"} tone={config.outputTarget === "updated" ? "neutral" : "gold"} />
       </section>
 
+      <section className="rounded-2xl border border-white/10 bg-[#0d1118]">
+        <div className="flex flex-col gap-3 border-b border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-white">Trading universes</h2>
+            <p className="mt-1 text-[11px] text-[#718096]">Load the same conservative S-ICT setup with market-correct symbols, session, and timezone.</p>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] text-[#93a1b6]"><Waypoints className="size-3.5 text-[#f2c873]" />{marketMetadata.session} · {marketMetadata.timezone}</div>
+        </div>
+        <div className="grid gap-3 p-4 lg:grid-cols-3">
+          {UNIVERSE_PRESETS.map((preset) => {
+            const selected = preset.id === selectedUniverse;
+            const direct = preset.runnerSupport === "direct";
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => applyUniverse(preset)}
+                aria-pressed={selected}
+                className={classNames(
+                  "rounded-xl border p-4 text-left transition",
+                  selected ? "border-[#d9a441]/60 bg-[#d9a441]/[0.08] shadow-[0_0_0_1px_rgba(217,164,65,0.12)]" : "border-white/10 bg-[#090d14] hover:border-white/20 hover:bg-white/[0.025]",
+                )}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div><div className="text-sm font-semibold text-white">{preset.label}</div><div className="mt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#718096]">{preset.session}</div></div>
+                  <StatusBadge tone={direct ? "green" : "gold"}>{direct ? "Runner ready" : "Adapter gate"}</StatusBadge>
+                </div>
+                <p className="mt-3 text-xs leading-5 text-[#93a1b6]">{preset.note}</p>
+                <div className="mt-3 line-clamp-2 font-mono text-[10px] leading-4 text-[#6fa8ff]">{preset.symbols.join(" · ")}</div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       <section className="grid gap-5 xl:grid-cols-[minmax(360px,0.8fr)_minmax(640px,1.35fr)]">
         <div className="space-y-5">
           <div className="rounded-2xl border border-white/10 bg-[#0d1118]">
             <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
-              <div className="flex items-center gap-2.5"><Settings2 className="size-4 text-[#f2c873]" /><div><h2 className="text-sm font-semibold text-white">Run configuration</h2><p className="text-[11px] text-[#718096]">Only controls supported by the runner</p></div></div>
-              <StatusBadge tone="green">Wired</StatusBadge>
+              <div className="flex items-center gap-2.5"><Settings2 className="size-4 text-[#f2c873]" /><div><h2 className="text-sm font-semibold text-white">Run configuration</h2><p className="text-[11px] text-[#718096]">Controls and symbols for the selected workflow</p></div></div>
+              <StatusBadge tone={runnerSupported ? "green" : "gold"}>{runnerSupported ? "Wired" : "Adapter required"}</StatusBadge>
             </div>
             <div className="grid gap-4 p-5 sm:grid-cols-2">
               <label className="sm:col-span-2">
-                <FieldLabel wired>Symbols</FieldLabel>
+                <FieldLabel wired={runnerSupported}>Symbols</FieldLabel>
                 <input value={config.symbols} onChange={(event) => updateConfig("symbols", event.target.value)} placeholder="AAPL, MSFT, CVX" className="w-full rounded-lg border border-white/10 bg-[#090d14] px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-[#4f5c70] focus:border-[#d9a441]/60" />
                 <span className="mt-1.5 block text-[11px] text-[#657187]">{symbols.length} normalized symbol{symbols.length === 1 ? "" : "s"}: {symbols.join(", ") || "none"}</span>
               </label>
               <label>
-                <FieldLabel wired>Market</FieldLabel>
-                <select value={config.market} onChange={(event) => updateConfig("market", event.target.value as Market)} className="w-full rounded-lg border border-white/10 bg-[#090d14] px-3 py-2.5 text-sm text-white outline-none focus:border-[#d9a441]/60"><option value="us">US equities</option><option value="forex">Forex</option></select>
+                <FieldLabel wired={runnerSupported}>Market</FieldLabel>
+                <select value={config.market} onChange={(event) => updateConfig("market", event.target.value as Market)} className="w-full rounded-lg border border-white/10 bg-[#090d14] px-3 py-2.5 text-sm text-white outline-none focus:border-[#d9a441]/60"><option value="us">US equities</option><option value="forex">Forex</option><option value="india">India · NSE</option></select>
               </label>
               <label>
-                <FieldLabel wired>Workers</FieldLabel>
+                <FieldLabel wired={runnerSupported}>Workers</FieldLabel>
                 <select value={config.workers} onChange={(event) => updateConfig("workers", Number(event.target.value))} className="w-full rounded-lg border border-white/10 bg-[#090d14] px-3 py-2.5 text-sm text-white outline-none focus:border-[#d9a441]/60"><option value={1}>1 · diagnostic</option><option value={3}>3 · standard</option><option value={8}>8 · high throughput</option></select>
               </label>
               <label>
-                <FieldLabel wired>Start date</FieldLabel>
+                <FieldLabel wired={runnerSupported}>Start date</FieldLabel>
                 <input type="date" value={config.startDate} onChange={(event) => updateConfig("startDate", event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#090d14] px-3 py-2.5 text-sm text-white outline-none focus:border-[#d9a441]/60" />
               </label>
               <label>
-                <FieldLabel wired>End date</FieldLabel>
+                <FieldLabel wired={runnerSupported}>End date</FieldLabel>
                 <input type="date" value={config.endDate} onChange={(event) => updateConfig("endDate", event.target.value)} className="w-full rounded-lg border border-white/10 bg-[#090d14] px-3 py-2.5 text-sm text-white outline-none focus:border-[#d9a441]/60" />
               </label>
               <label>
-                <FieldLabel wired>Return window</FieldLabel>
+                <FieldLabel wired={runnerSupported}>Return window</FieldLabel>
                 <select value={config.returnWindowBars} onChange={(event) => updateConfig("returnWindowBars", Number(event.target.value))} className="w-full rounded-lg border border-white/10 bg-[#090d14] px-3 py-2.5 text-sm text-white outline-none focus:border-[#d9a441]/60"><option value={160}>160 bars</option><option value={200}>200 bars</option><option value={260}>260 bars · default</option><option value={320}>320 bars</option></select>
               </label>
               <label>
-                <FieldLabel wired>Entry branch</FieldLabel>
+                <FieldLabel wired={runnerSupported}>Entry branch</FieldLabel>
                 <select value={config.entryMode} onChange={(event) => updateConfig("entryMode", event.target.value as EntryMode)} className="w-full rounded-lg border border-white/10 bg-[#090d14] px-3 py-2.5 text-sm text-white outline-none focus:border-[#d9a441]/60"><option value="conservative">Conservative · FVG</option><option value="both">Research · FVG + iFVG</option></select>
               </label>
               <label className="sm:col-span-2">
-                <FieldLabel wired>Output target</FieldLabel>
+                <FieldLabel wired={runnerSupported}>Output target</FieldLabel>
                 <select value={config.outputTarget} onChange={(event) => updateConfig("outputTarget", event.target.value as OutputTarget)} className="w-full rounded-lg border border-white/10 bg-[#090d14] px-3 py-2.5 text-sm text-white outline-none focus:border-[#d9a441]/60"><option value="updated">updated · scratch A/B tables</option><option value="production_ready">production_ready · protected tables</option></select>
               </label>
               <button type="button" onClick={() => updateConfig("requireSweep", !config.requireSweep)} className={classNames("sm:col-span-2 flex items-center justify-between gap-4 rounded-xl border p-3 text-left transition", config.requireSweep ? "border-[#2fbf71]/30 bg-[#2fbf71]/[0.07]" : "border-[#d9a441]/35 bg-[#d9a441]/[0.07]") }>
@@ -570,7 +704,7 @@ export default function SictStrategyBuilder({ onOpenBacktest }: { onOpenBacktest
 
         <div className="rounded-2xl border border-white/10 bg-[#0d1118]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
-            <div className="flex items-center gap-2.5"><Code2 className="size-4 text-[#62d894]" /><div><h2 className="text-sm font-semibold text-white">Generated handoff</h2><p className="text-[11px] text-[#718096]">Copy into the existing Backtesting_ICT_2017 workflow</p></div></div>
+            <div className="flex items-center gap-2.5"><Code2 className="size-4 text-[#62d894]" /><div><h2 className="text-sm font-semibold text-white">Generated handoff</h2><p className="text-[11px] text-[#718096]">{runnerSupported ? "Copy into the existing Backtesting_ICT_2017 workflow" : "Export the India configuration for S-ICT adapter implementation"}</p></div></div>
             <div className="flex flex-wrap gap-2">
               <button onClick={copyOutput} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-[#c8d0dc] hover:bg-white/[0.07]"><Clipboard className="size-3.5" />Copy</button>
               <button onClick={downloadJson} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-[#c8d0dc] hover:bg-white/[0.07]"><Download className="size-3.5" />JSON</button>
@@ -582,15 +716,15 @@ export default function SictStrategyBuilder({ onOpenBacktest }: { onOpenBacktest
           <pre className="max-h-[420px] min-h-[330px] overflow-auto whitespace-pre-wrap break-words bg-[#090d14] p-5 font-mono text-[11px] leading-5 text-[#b8c3d2]">{activeOutput}</pre>
           <div className="grid gap-px border-t border-white/10 bg-white/10 sm:grid-cols-3">
             <div className="flex items-start gap-2 bg-[#0d1118] p-4"><GitBranch className="mt-0.5 size-4 shrink-0 text-[#80b4ff]" /><div><div className="text-xs font-semibold text-white">Scratch first</div><div className="mt-1 text-[11px] leading-4 text-[#718096]">Default writes to updated A/B tables.</div></div></div>
-            <div className="flex items-start gap-2 bg-[#0d1118] p-4"><LockKeyhole className="mt-0.5 size-4 shrink-0 text-[#f2c873]" /><div><div className="text-xs font-semibold text-white">No browser launch</div><div className="mt-1 text-[11px] leading-4 text-[#718096]">Operator executes the generated command.</div></div></div>
+            <div className="flex items-start gap-2 bg-[#0d1118] p-4"><LockKeyhole className="mt-0.5 size-4 shrink-0 text-[#f2c873]" /><div><div className="text-xs font-semibold text-white">{runnerSupported ? "No browser launch" : "Execution protected"}</div><div className="mt-1 text-[11px] leading-4 text-[#718096]">{runnerSupported ? "Operator executes the generated command." : "No India command is emitted until the S-ICT adapter exists."}</div></div></div>
             <div className="flex items-start gap-2 bg-[#0d1118] p-4"><Target className="mt-0.5 size-4 shrink-0 text-[#62d894]" /><div><div className="text-xs font-semibold text-white">Real targets</div><div className="mt-1 text-[11px] leading-4 text-[#718096]">No synthetic RR projections.</div></div></div>
           </div>
         </div>
       </section>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-[#2fbf71]/20 bg-[#2fbf71]/[0.05] p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-3"><div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#2fbf71]/15 text-[#62d894]"><Sparkles className="size-5" /></div><div><h2 className="text-sm font-semibold text-white">Next: validate the generated package</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-[#8da699]">A valid configuration is not evidence of an edge. Run it in the Backtest tab, inspect expectancy and drawdown, then promote only after the policy gates pass.</p></div></div>
-        <button onClick={onOpenBacktest} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-[#2fbf71]/35 bg-[#2fbf71]/15 px-4 py-2.5 text-xs font-bold text-[#76dda2] transition hover:bg-[#2fbf71]/25"><Play className="size-4" />Open Backtest<ArrowRight className="size-3.5" /></button>
+      <section className={classNames("flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between", runnerSupported ? "border-[#2fbf71]/20 bg-[#2fbf71]/[0.05]" : "border-[#d9a441]/25 bg-[#d9a441]/[0.05]")}>
+        <div className="flex items-start gap-3"><div className={classNames("grid size-10 shrink-0 place-items-center rounded-xl", runnerSupported ? "bg-[#2fbf71]/15 text-[#62d894]" : "bg-[#d9a441]/15 text-[#f2c873]")}><Sparkles className="size-5" /></div><div><h2 className="text-sm font-semibold text-white">{runnerSupported ? "Next: validate the generated package" : "Next: connect the India S-ICT adapter"}</h2><p className={classNames("mt-1 max-w-2xl text-xs leading-5", runnerSupported ? "text-[#8da699]" : "text-[#b7a47c]")}>{runnerSupported ? "A valid configuration is not evidence of an edge. Run it in the Backtest tab, inspect expectancy and drawdown, then promote only after the policy gates pass." : "The NIFTY and BANKNIFTY setup is fully specified and exportable, but execution remains gated until S-ICT is added to the India historical runner."}</p></div></div>
+        <button onClick={onOpenBacktest} disabled={!runnerSupported} className={classNames("inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-xs font-bold transition", runnerSupported ? "border-[#2fbf71]/35 bg-[#2fbf71]/15 text-[#76dda2] hover:bg-[#2fbf71]/25" : "cursor-not-allowed border-white/10 bg-white/[0.03] text-[#657187]")}><Play className="size-4" />{runnerSupported ? "Open Backtest" : "Adapter required"}<ArrowRight className="size-3.5" /></button>
       </section>
 
       {notice ? <div className="fixed bottom-5 right-5 z-50 flex max-w-sm items-center gap-2 rounded-xl border border-white/10 bg-[#121823] px-4 py-3 text-xs text-white shadow-2xl"><CheckCircle2 className="size-4 shrink-0 text-[#62d894]" />{notice}</div> : null}
