@@ -6,6 +6,8 @@ import {
   ArrowUp,
   BarChart3,
   CalendarClock,
+  Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   CircleAlert,
@@ -115,15 +117,17 @@ function dateTime(value: string | null | undefined, timezone?: string | null) {
   if (!value) return "Unavailable";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Unavailable";
-  return date.toLocaleString("en-US", {
+  const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: timezone || undefined,
-    month: "short",
-    day: "2-digit",
     year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
-    timeZoneName: "short",
-  });
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.day}-${values.month}-${values.year} ${values.hour}:${values.minute}`;
 }
 
 function displayTicker(value: string | null | undefined) {
@@ -141,7 +145,7 @@ export default function RealtimeOrdersDashboard({ onOpenTrade }: Props) {
   const [error, setError] = useState("");
   const [market, setMarket] = useState("ALL");
   const [ticker, setTicker] = useState("ALL");
-  const [strategy, setStrategy] = useState("ALL");
+  const [strategies, setStrategies] = useState<string[]>(["S03", "S16"]);
   const [direction, setDirection] = useState("ALL");
   const [status, setStatus] = useState("ALL");
   const [dateFrom, setDateFrom] = useState("");
@@ -158,7 +162,7 @@ export default function RealtimeOrdersDashboard({ onOpenTrade }: Props) {
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
-    const query = new URLSearchParams({ market, ticker, strategy, direction, status, page: String(page), page_size: String(pageSize), sort, order });
+    const query = new URLSearchParams({ market, ticker, strategy: strategies.length ? strategies.join(",") : "ALL", direction, status, page: String(page), page_size: String(pageSize), sort, order });
     if (dateFrom) query.set("date_from", dateFrom);
     if (dateTo) query.set("date_to", dateTo);
     try {
@@ -171,7 +175,7 @@ export default function RealtimeOrdersDashboard({ onOpenTrade }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [dateFrom, dateTo, direction, market, order, page, pageSize, sort, status, strategy, ticker]);
+  }, [dateFrom, dateTo, direction, market, order, page, pageSize, sort, status, strategies, ticker]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), 0);
@@ -192,7 +196,7 @@ export default function RealtimeOrdersDashboard({ onOpenTrade }: Props) {
   const dailyOrMonthly = periodMode === "daily" ? data?.series?.daily ?? [] : data?.series?.monthly ?? [];
   const heatmapRows = heatmapMode === "daily" ? data?.series?.daily ?? [] : data?.series?.monthly ?? [];
   const deployabilityRows = scoreDeployability(data?.strategy_performance ?? []);
-  const filterScope = describeFilterScope({ market, ticker, strategy, direction, status, dateFrom, dateTo });
+  const filterScope = describeFilterScope({ market, ticker, strategies, direction, status, dateFrom, dateTo });
 
   const changeWorkspaceMode = (value: WorkspaceMode) => {
     setWorkspaceMode(value);
@@ -222,7 +226,7 @@ export default function RealtimeOrdersDashboard({ onOpenTrade }: Props) {
       <div className="grid gap-2 rounded-xl border border-white/10 bg-[#101620] p-3 sm:grid-cols-2 xl:grid-cols-8">
         <Select label="Market" value={market} options={["ALL", ...(data?.filters?.markets ?? [])]} onChange={(value) => resetPage(setMarket, value)} />
         <Select label="Stock" value={ticker} options={["ALL", ...(data?.filters?.tickers ?? [])]} formatOption={displayTicker} onChange={(value) => resetPage(setTicker, value)} />
-        <Select label="Strategy" value={strategy} options={["ALL", ...(data?.filters?.strategies ?? [])]} onChange={(value) => resetPage(setStrategy, value)} />
+        <MultiSelect label="Strategy" values={strategies} options={data?.filters?.strategies ?? []} onChange={(values) => resetPage(setStrategies, values)} />
         <Select label="Direction" value={direction} options={["ALL", "BUY", "SELL"]} onChange={(value) => resetPage(setDirection, value)} />
         <Select label="Trade state" value={status} options={["ALL", "OPEN", "COMPLETED"]} onChange={(value) => resetPage(setStatus, value)} />
         <DateField label="From" value={dateFrom} onChange={(value) => resetPage(setDateFrom, value)} />
@@ -316,11 +320,11 @@ function WorkspaceModeToggle({ value, onChange }: { value: WorkspaceMode; onChan
   );
 }
 
-function describeFilterScope(filters: { market: string; ticker: string; strategy: string; direction: string; status: string; dateFrom: string; dateTo: string }) {
+function describeFilterScope(filters: { market: string; ticker: string; strategies: string[]; direction: string; status: string; dateFrom: string; dateTo: string }) {
   const parts = [
     filters.market !== "ALL" ? filters.market : null,
     filters.ticker !== "ALL" ? displayTicker(filters.ticker) : null,
-    filters.strategy !== "ALL" ? filters.strategy : null,
+    filters.strategies.length ? filters.strategies.join(", ") : null,
     filters.direction !== "ALL" ? filters.direction : null,
     filters.status !== "ALL" ? filters.status : null,
     filters.dateFrom || filters.dateTo ? `${filters.dateFrom || "start"} to ${filters.dateTo || "latest"}` : null,
@@ -557,6 +561,26 @@ function CompactLedger({ title, rows, onOpenTrade, onOpenChart }: { title: strin
 function OutcomeBadge({ value }: { value: string }) { const v=value.toUpperCase(); const tone=v==="WIN"?"bg-emerald-400/10 text-emerald-300":v==="LOSS"?"bg-rose-400/10 text-rose-300":v==="OPEN"?"bg-cyan-400/10 text-cyan-300":"bg-white/5 text-[#93a1b6]"; return <span className={cx("rounded px-2 py-1 font-mono text-[9px] font-bold",tone)}>{value}</span>; }
 function OpenButton({ label, onClick, icon: Icon = ExternalLink }: { label: string; onClick: (event?: React.MouseEvent) => void; icon?: React.ComponentType<{ className?: string }> }) { return <button onClick={(event) => onClick(event)} className="flex items-center gap-1 rounded border border-white/10 px-2 py-1 text-[9px] text-[#b9c4d6] hover:border-violet-400/40 hover:text-violet-200">{label}<Icon className="size-2.5" /></button>; }
 function Select({ label, value, options, onChange, formatOption = (option) => option }: { label: string; value: string; options: string[]; onChange: (value: string) => void; formatOption?: (option: string) => string }) { return <label className="block"><span className="mb-1 block text-[9px] font-semibold uppercase tracking-wider text-[#657187]">{label}</span><select aria-label={label} value={value} onChange={(event)=>onChange(event.target.value)} className="h-8 w-full rounded-md border border-white/10 bg-[#0b0f16] px-2 text-xs text-white outline-none focus:border-violet-400/50">{[...new Set(options)].map((option)=><option key={option} value={option}>{formatOption(option)}</option>)}</select></label>; }
+function MultiSelect({ label, values, options, onChange }: { label: string; values: string[]; options: string[]; onChange: (values: string[]) => void }) {
+  const choices = [...new Set([...options, ...values])].sort();
+  const toggle = (option: string) => onChange(values.includes(option) ? values.filter((value) => value !== option) : [...values, option]);
+  return <div className="block">
+    <span className="mb-1 block text-[9px] font-semibold uppercase tracking-wider text-[#657187]">{label}</span>
+    <details className="group relative">
+      <summary className="flex h-8 cursor-pointer list-none items-center rounded-md border border-white/10 bg-[#0b0f16] px-2 text-xs text-white outline-none hover:border-violet-400/30 focus-visible:border-violet-400/50">
+        <span className="truncate">{values.length ? values.join(", ") : "All strategies"}</span><ChevronDown className="ml-auto size-3.5 text-[#657187] transition group-open:rotate-180" />
+      </summary>
+      <div className="absolute left-0 top-full z-30 mt-1 max-h-72 min-w-full overflow-y-auto rounded-md border border-violet-400/20 bg-[#0b0f16] p-1 shadow-2xl shadow-black/60">
+        <button type="button" onClick={() => onChange([])} className="mb-1 w-full rounded px-2 py-1.5 text-left text-[10px] text-[#7f8ca3] hover:bg-white/5">Clear selection (show all)</button>
+        {choices.map((option) => <label key={option} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-xs text-[#b9c4d6] hover:bg-violet-400/10 hover:text-white">
+          <input type="checkbox" checked={values.includes(option)} onChange={() => toggle(option)} className="sr-only" />
+          <span className={cx("grid size-4 place-items-center rounded border", values.includes(option) ? "border-violet-300 bg-violet-400/25 text-violet-100" : "border-white/20 bg-black/20 text-transparent")}><Check className="size-3" /></span>
+          {option}
+        </label>)}
+      </div>
+    </details>
+  </div>;
+}
 function DateField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) { return <label className="block"><span className="mb-1 block text-[9px] font-semibold uppercase tracking-wider text-[#657187]">{label}</span><input aria-label={label} type="date" value={value} onChange={(event)=>onChange(event.target.value)} className="h-8 w-full rounded-md border border-white/10 bg-[#0b0f16] px-2 text-xs text-white outline-none focus:border-violet-400/50" /></label>; }
 function LoadingState() { return <div className="grid min-h-80 place-items-center rounded-xl border border-white/10 bg-[#101620]"><div className="text-center text-sm text-[#93a1b6]"><LoaderCircle className="mx-auto mb-3 size-8 animate-spin text-violet-300" />Loading realtime signals and orders…</div></div>; }
 function ErrorState({ message, retry }: { message: string; retry: () => Promise<void> }) { return <div className="flex items-center gap-3 rounded-xl border border-rose-400/20 bg-rose-400/[0.06] p-4 text-sm text-rose-200"><CircleAlert className="size-5 shrink-0" /><div><div className="font-semibold">Realtime analytics unavailable</div><div className="mt-1 text-xs text-rose-200/70">{message}</div></div><button onClick={()=>void retry()} className="ml-auto rounded-md border border-rose-300/20 px-3 py-2 text-xs">Retry</button></div>; }

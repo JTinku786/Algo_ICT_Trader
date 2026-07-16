@@ -9,10 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@sparticuz/chromium": "^149.0.0",
     "lightweight-charts": "^5.2.0",
     "lucide-react": "^1.23.0",
     "next": "16.2.10",
     "pg": "^8.22.0",
+    "puppeteer-core": "^25.3.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },

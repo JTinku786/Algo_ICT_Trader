@@ -57,6 +57,20 @@ function localDate(value: unknown, timezone: string) {
   return `${map.year}-${map.month}-${map.day}`;
 }
 
+function marketLocalDateTimeKey(value: unknown, timezone: string) {
+  if (!value) return -Infinity;
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return -Infinity;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const map = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return Number(`${map.year}${map.month}${map.day}${map.hour}${map.minute}${map.second}`);
+}
+
 function round(value: number, digits = 2) {
   const factor = 10 ** digits;
   return Math.round(value * factor) / factor;
@@ -118,7 +132,7 @@ export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
   const market = (sp.get("market") || "ALL").trim();
   const ticker = (sp.get("ticker") || "ALL").trim().toUpperCase();
-  const strategy = (sp.get("strategy") || "ALL").trim().toUpperCase();
+  const strategies = (sp.get("strategy") || "ALL").split(",").map((value) => value.trim().toUpperCase()).filter((value) => value && value !== "ALL");
   const direction = (sp.get("direction") || "ALL").trim().toUpperCase();
   const status = (sp.get("status") || "ALL").trim().toUpperCase();
   const dateFrom = (sp.get("date_from") || "").trim();
@@ -136,7 +150,6 @@ export async function GET(request: NextRequest) {
   };
   if (market !== "ALL") add("LOWER(s.market) = LOWER(?)", market);
   if (ticker !== "ALL") add("UPPER(s.ticker) = UPPER(?)", ticker);
-  if (strategy !== "ALL") add("UPPER(s.strategy_id) = UPPER(?)", strategy);
   if (direction !== "ALL") add("UPPER(s.direction) = UPPER(?)", direction);
   if (status === "OPEN") conditions.push("o.state = 'OPEN'");
   if (status === "COMPLETED") conditions.push("o.state LIKE 'CLOSED%'");
@@ -151,6 +164,7 @@ export async function GET(request: NextRequest) {
     if (restApiUrl) {
       const upstream = new URL("/api/realtime-analytics/rows", restApiUrl);
       for (const [key, value] of sp.entries()) upstream.searchParams.set(key, value);
+      upstream.searchParams.set("strategy", "ALL");
       const upstreamResponse = await fetch(upstream, {
         headers: process.env.CANDLES_REST_API_TOKEN ? { "x-api-key": process.env.CANDLES_REST_API_TOKEN } : undefined,
         cache: "no-store",
@@ -219,13 +233,14 @@ export async function GET(request: NextRequest) {
     // Apply date boundaries after converting each row to its market-local trading
     // date. PostgreSQL session dates would otherwise shift India/US rows around
     // midnight and disagree with the IST/ET dates shown in the interface.
-    const normalized = normalizedAll.filter((row) => {
+    const dateScoped = normalizedAll.filter((row) => {
       const date = text(row.local_date);
       if (!date) return !dateFrom && !dateTo;
       if (dateFrom && date < dateFrom) return false;
       if (dateTo && date > dateTo) return false;
       return true;
     });
+    const normalized = dateScoped.filter((row) => !strategies.length || strategies.includes(text(row.strategy_id).toUpperCase()));
 
     const performanceRows = normalized.filter((row) => row.order_id);
     const latestByMarket: Record<string, { market: string; timezone: string; date: string; orders: number; last_7_days: number; last_30_days: number }> = {};
@@ -313,11 +328,16 @@ export async function GET(request: NextRequest) {
       return value !== null && value >= bin.min && value < bin.max;
     }).length }));
 
-    const sortValue = (row: Row) => sort === "realized_r" ? n(row.realized_r) ?? -Infinity : text(row[sort]);
+    const sortValue = (row: Row) => {
+      if (sort === "entry_datetime") return marketLocalDateTimeKey(row.entry_datetime, text(row.timezone));
+      return sort === "realized_r" ? n(row.realized_r) ?? -Infinity : text(row[sort]);
+    };
     const sorted = [...normalized].sort((a, b) => {
       const av = sortValue(a); const bv = sortValue(b);
       const comparison = typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv));
-      return order === "asc" ? comparison : -comparison;
+      if (comparison !== 0) return order === "asc" ? comparison : -comparison;
+      const tieBreaker = `${text(a.signal_hash)}-${text(a.order_id)}`.localeCompare(`${text(b.signal_hash)}-${text(b.order_id)}`);
+      return order === "asc" ? tieBreaker : -tieBreaker;
     });
     const start = (page - 1) * pageSize;
 
@@ -329,9 +349,9 @@ export async function GET(request: NextRequest) {
       filters: {
         markets: [...new Set(normalized.map((row) => text(row.market)).filter(Boolean))].sort(),
         tickers: [...new Set(normalized.map((row) => text(row.ticker)).filter(Boolean))].sort(),
-        strategies: [...new Set(normalized.map((row) => text(row.strategy_id)).filter(Boolean))].sort(),
+        strategies: [...new Set(dateScoped.map((row) => text(row.strategy_id)).filter(Boolean))].sort(),
       },
-      query: { market, ticker, strategy, direction, status, date_from: dateFrom, date_to: dateTo, page, page_size: pageSize, sort, order },
+      query: { market, ticker, strategies, direction, status, date_from: dateFrom, date_to: dateTo, page, page_size: pageSize, sort, order },
       counts: { latest_by_market: Object.values(latestByMarket), signals: normalized.length, orders: performanceRows.length, open: performanceRows.filter((row) => row.outcome === "OPEN").length, completed: performanceRows.filter((row) => ["WIN", "LOSS", "BREAKEVEN"].includes(text(row.outcome))).length },
       summary: { strategies: new Set(normalized.map((row) => row.strategy_id)).size, tickers: new Set(normalized.map((row) => row.ticker)).size, buy_setups: normalized.filter((row) => text(row.direction).toUpperCase() === "BUY").length, sell_setups: normalized.filter((row) => text(row.direction).toUpperCase() === "SELL").length, avg_risk_points: normalized.some((row) => n(row.risk_points) !== null) ? round(normalized.reduce((sum, row) => sum + (n(row.risk_points) ?? 0), 0) / normalized.filter((row) => n(row.risk_points) !== null).length, 4) : null, avg_planned_rr: normalized.some((row) => n(row.planned_rr) !== null) ? round(normalized.reduce((sum, row) => sum + (n(row.planned_rr) ?? 0), 0) / normalized.filter((row) => n(row.planned_rr) !== null).length) : null, ...stats(performanceRows) },
       series: { daily, monthly, equity, weekdays, rr_distribution: rrBins },

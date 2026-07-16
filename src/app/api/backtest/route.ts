@@ -4,6 +4,27 @@ import { getPostgresPool } from "@/lib/db";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+// The original historical pipeline remains frozen.  Expose the isolated
+// updated counter-trade family through a read-only common projection so the
+// existing dashboard calculations and filters remain unchanged.
+const BACKTEST_ORDERS = `(
+  SELECT order_id, signal_id, market, source_market, symbol, strategy_id, run_date,
+         state, direction, entry_price, stoploss, tp1, tp2, tp3, filled_price, filled_at
+  FROM historical_ict_orders
+  UNION ALL
+  SELECT order_id, signal_id, market, source_market, symbol, strategy_id, run_date,
+         state, direction, entry_price, stoploss, tp1, tp2, tp3, filled_price, filled_at
+  FROM historical_ict_orders_updated
+)`;
+
+const BACKTEST_TARGETS = `(
+  SELECT order_id, target_no, target_price, target_rr, state, close_ts, close_price, close_reason
+  FROM historical_ict_order_target_outcomes
+  UNION ALL
+  SELECT order_id, target_no, target_price, target_rr, state, close_ts, close_price, close_reason
+  FROM historical_ict_order_target_outcomes_updated
+)`;
+
 type RawTrade = {
   order_id: string;
   symbol: string;
@@ -148,16 +169,16 @@ export async function GET(request: NextRequest) {
     const pool = getPostgresPool();
 
     const symbolsQ = pool.query(
-      `SELECT DISTINCT o.symbol FROM historical_ict_orders o
-       JOIN historical_ict_order_target_outcomes t ON t.order_id=o.order_id
+      `SELECT DISTINCT o.symbol FROM ${BACKTEST_ORDERS} o
+       JOIN ${BACKTEST_TARGETS} t ON t.order_id=o.order_id
        WHERE t.state IN ('CLOSED_TP','CLOSED_SL') ORDER BY o.symbol`,
     );
     const strategiesQ = (() => {
       if (symbol && symbol !== "ALL") {
         return pool.query(
           `SELECT o.strategy_id, MIN(r.strategy_name) AS strategy_name, MIN(r.strategy_key) AS strategy_key, COUNT(*)::int AS n
-           FROM historical_ict_orders o
-           JOIN historical_ict_order_target_outcomes t ON t.order_id=o.order_id
+           FROM ${BACKTEST_ORDERS} o
+           JOIN ${BACKTEST_TARGETS} t ON t.order_id=o.order_id
            LEFT JOIN ict_strategy_reference r ON r.strategy_id = o.strategy_id
            WHERE t.state IN ('CLOSED_TP','CLOSED_SL') AND t.target_no=$1 AND UPPER(o.symbol)=$2
            GROUP BY o.strategy_id ORDER BY n DESC`,
@@ -166,8 +187,8 @@ export async function GET(request: NextRequest) {
       }
       return pool.query(
         `SELECT o.strategy_id, MIN(r.strategy_name) AS strategy_name, MIN(r.strategy_key) AS strategy_key, COUNT(*)::int AS n
-         FROM historical_ict_orders o
-         JOIN historical_ict_order_target_outcomes t ON t.order_id=o.order_id
+         FROM ${BACKTEST_ORDERS} o
+         JOIN ${BACKTEST_TARGETS} t ON t.order_id=o.order_id
          LEFT JOIN ict_strategy_reference r ON r.strategy_id = o.strategy_id
          WHERE t.state IN ('CLOSED_TP','CLOSED_SL') AND t.target_no=$1
          GROUP BY o.strategy_id ORDER BY n DESC`,
@@ -177,15 +198,15 @@ export async function GET(request: NextRequest) {
     const yearsQ = (() => {
       if (symbol && symbol !== "ALL") {
         return pool.query(
-          `SELECT DISTINCT EXTRACT(YEAR FROM o.run_date)::int AS y FROM historical_ict_orders o
-           JOIN historical_ict_order_target_outcomes t ON t.order_id=o.order_id
+          `SELECT DISTINCT EXTRACT(YEAR FROM o.run_date)::int AS y FROM ${BACKTEST_ORDERS} o
+           JOIN ${BACKTEST_TARGETS} t ON t.order_id=o.order_id
            WHERE t.state IN ('CLOSED_TP','CLOSED_SL') AND UPPER(o.symbol)=$1 ORDER BY y DESC`,
           [symbol],
         );
       }
       return pool.query(
-        `SELECT DISTINCT EXTRACT(YEAR FROM o.run_date)::int AS y FROM historical_ict_orders o
-         JOIN historical_ict_order_target_outcomes t ON t.order_id=o.order_id
+        `SELECT DISTINCT EXTRACT(YEAR FROM o.run_date)::int AS y FROM ${BACKTEST_ORDERS} o
+         JOIN ${BACKTEST_TARGETS} t ON t.order_id=o.order_id
          WHERE t.state IN ('CLOSED_TP','CLOSED_SL') ORDER BY y DESC`,
       );
     })();
@@ -193,8 +214,8 @@ export async function GET(request: NextRequest) {
       `SELECT o.order_id, o.symbol, o.strategy_id, r.strategy_name, o.direction, o.filled_at,
               o.entry_price, o.filled_price, o.stoploss, o.tp1,
               t.close_ts, t.close_price, t.target_rr, t.state
-       FROM historical_ict_orders o
-       JOIN historical_ict_order_target_outcomes t ON t.order_id=o.order_id
+       FROM ${BACKTEST_ORDERS} o
+       JOIN ${BACKTEST_TARGETS} t ON t.order_id=o.order_id
        LEFT JOIN ict_strategy_reference r ON r.strategy_id = o.strategy_id
        WHERE ${where}
        ORDER BY t.close_ts ASC NULLS LAST, o.order_id`,
@@ -746,7 +767,7 @@ function buildResearch(trades: Trade[], sizing: SizingSettings, oosPct: number) 
     audit: {
       calculation_version: "research-v1",
       generated_at: new Date().toISOString(),
-      source: "historical_ict_orders + historical_ict_order_target_outcomes",
+      source: "historical_ict original + isolated updated backtest tables",
       assumptions: [
         `${sizing.mode} sizing`,
         `${round(sizing.commissionBps)} bps commission plus ${round(sizing.slippageBps)} bps slippage on entry and exit notional`,

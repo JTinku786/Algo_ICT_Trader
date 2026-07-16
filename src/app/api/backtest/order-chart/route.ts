@@ -4,6 +4,24 @@ import { getPostgresPool } from "@/lib/db";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+const BACKTEST_ORDERS = `(
+  SELECT order_id, signal_id, market, symbol, direction, entry_price, filled_price,
+         stoploss, tp1, tp2, tp3, filled_at
+  FROM historical_ict_orders
+  UNION ALL
+  SELECT order_id, signal_id, market, symbol, direction, entry_price, filled_price,
+         stoploss, tp1, tp2, tp3, filled_at
+  FROM historical_ict_orders_updated
+)`;
+
+const BACKTEST_TARGETS = `(
+  SELECT order_id, target_no, target_price, target_rr, state, close_ts, close_price, close_reason
+  FROM historical_ict_order_target_outcomes
+  UNION ALL
+  SELECT order_id, target_no, target_price, target_rr, state, close_ts, close_price, close_reason
+  FROM historical_ict_order_target_outcomes_updated
+)`;
+
 function num(v: unknown): number | null {
   if (v === null || v === undefined) return null;
   const n = Number(v);
@@ -107,8 +125,8 @@ export async function GET(request: NextRequest) {
               o.entry_price, o.filled_price, o.stoploss, o.tp1, o.tp2, o.tp3,
               o.filled_at, t.target_no, t.target_price, t.target_rr, t.state,
               t.close_ts, t.close_price, t.close_reason
-       FROM historical_ict_orders o
-       JOIN historical_ict_order_target_outcomes t ON t.order_id=o.order_id
+       FROM ${BACKTEST_ORDERS} o
+       JOIN ${BACKTEST_TARGETS} t ON t.order_id=o.order_id
        WHERE o.order_id = $1 AND t.target_no = $2
        LIMIT 1`,
       [orderId, target_no],
