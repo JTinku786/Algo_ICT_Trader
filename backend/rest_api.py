@@ -965,7 +965,7 @@ def realtime_analytics_rows():
 
     market = (request.args.get("market") or "ALL").strip()
     ticker = (request.args.get("ticker") or "ALL").strip().upper()
-    strategy = (request.args.get("strategy") or "ALL").strip().upper()
+    strategies = [value.strip().upper() for value in (request.args.get("strategy") or "ALL").split(",") if value.strip() and value.strip().upper() != "ALL"]
     direction = (request.args.get("direction") or "ALL").strip().upper()
     status = (request.args.get("status") or "ALL").strip().upper()
 
@@ -977,9 +977,9 @@ def realtime_analytics_rows():
     if ticker != "ALL":
         conditions.append("UPPER(s.ticker) = UPPER(%s)")
         params.append(ticker)
-    if strategy != "ALL":
-        conditions.append("UPPER(s.strategy_id) = UPPER(%s)")
-        params.append(strategy)
+    if strategies:
+        conditions.append("UPPER(s.strategy_id) = ANY(%s)")
+        params.append(strategies)
     if direction != "ALL":
         conditions.append("UPPER(s.direction) = UPPER(%s)")
         params.append(direction)

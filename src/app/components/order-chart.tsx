@@ -91,6 +91,22 @@ function clamp(value: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, value));
 }
 
+// Resolve the exchange timezone for an order so every datetime in the chart is
+// shown in the market's local time — IST for Indian stocks, ET for US stocks —
+// matching the dashboard table and the rest of the app. Falls back to the
+// symbol suffix (.NS/.BO, NSE:/BSE:) when the market field is missing.
+function marketTimeZone(market: string | null | undefined, symbol?: string | null): string {
+  const m = (market || "").trim().toLowerCase();
+  if (m === "india" || m === "in" || m === "nse" || m === "bse") return "Asia/Kolkata";
+  if (m === "us" || m === "usa" || m === "united states" || m.includes("nasdaq") || m.includes("nyse")) return "America/New_York";
+  const s = (symbol || "").trim().toUpperCase();
+  if (s.endsWith(".NS") || s.endsWith(".BO") || s.startsWith("NSE:") || s.startsWith("BSE:")) return "Asia/Kolkata";
+  return "America/New_York";
+}
+function tzShortLabel(tz: string): string {
+  return tz === "Asia/Kolkata" ? "IST" : "ET";
+}
+
 function isIfvgZone(zone: OverlayZone) {
   const hint = `${zone.kind || ""} ${zone.label || ""}`.toLowerCase();
   return zone.broken || hint.includes("ifvg") || hint.includes("inverse fair value gap") || hint.includes("inverse_fvg");
@@ -377,6 +393,10 @@ function InteractiveChart({
 
   const overlays = data?.overlays;
 
+  // Exchange timezone for this order — all datetimes below render in it.
+  const tz = marketTimeZone(data?.order?.market, symbol);
+  const tzLabel = tzShortLabel(tz);
+
   // Base granularity (median spacing). Higher-timeframe aggregation and lazy
   // history are only offered for a 5-minute base series.
   const baseStep = useMemo(() => {
@@ -447,7 +467,9 @@ function InteractiveChart({
   const visLo = clamp(Math.floor(start), 0, lastIdx);
   const visHi = clamp(Math.ceil(end), 0, lastIdx);
 
-  const beforeEntry = (t: number | null | undefined) => t === null || t === undefined || t <= entryTime + 600;
+  // Only show ICT context that formed at or before the entry — nothing after we
+  // are in the trade. (Post-entry review labels can be added back later.)
+  const beforeEntry = (t: number | null | undefined) => t === null || t === undefined || t <= entryTime;
   const showZones = tfOverlays ? {
     order_blocks: (tfOverlays["order_blocks"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time)).sort((a, b) => a.time - b.time).slice(-2),
     fvgs: fvgOnlyZones((tfOverlays["fvgs"] as OverlayZone[] ?? []).filter((z) => beforeEntry(z.time))).slice(-4),
@@ -627,7 +649,7 @@ function InteractiveChart({
       ctx.fillRect(0, 0, width, vbHeight);
       ctx.drawImage(image, 0, 0, width, vbHeight);
       const link = document.createElement("a");
-      const stamp = data?.order?.filled_at ? new Date(data.order.filled_at).toISOString().slice(0, 10) : "chart";
+      const stamp = data?.order?.filled_at ? new Date(data.order.filled_at).toLocaleDateString("en-CA", { timeZone: tz }) : "chart";
       link.download = `${(symbol || "order").replace(/[^A-Za-z0-9_.-]/g, "_")}-${activeTf}-${stamp}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
@@ -637,7 +659,7 @@ function InteractiveChart({
 
   const entryX = xByTime(entryTime);
   const entryDateStr = data?.order?.filled_at
-    ? new Date(data.order.filled_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+    ? new Date(data.order.filled_at).toLocaleString("en-US", { timeZone: tz, month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
     : "";
 
   const ticks: { x: number; label: string; major: boolean }[] = [];
@@ -647,15 +669,15 @@ function InteractiveChart({
     for (let i = visLo; i <= visHi; i += step) {
       if (i >= slotCount) break;
       const d = new Date(times[i] * 1000);
-      const dayKey = d.toDateString();
+      const dayKey = d.toLocaleDateString("en-US", { timeZone: tz });
       const dayChanged = dayKey !== prevDay;
       prevDay = dayKey;
       ticks.push({
         x: xByIndex(i),
         major: dayChanged,
         label: dayChanged
-          ? d.toLocaleString("en-US", { month: "short", day: "numeric" })
-          : d.toLocaleString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }),
+          ? d.toLocaleString("en-US", { timeZone: tz, month: "short", day: "numeric" })
+          : d.toLocaleString("en-US", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }),
       });
     }
   }
@@ -757,6 +779,11 @@ function InteractiveChart({
 
           <rect width={width} height={vbHeight} fill="#e5e7eb" />
 
+          {/* Timezone caption — all datetimes on this chart are market-local */}
+          <text x={pad} y={16} fill="rgba(15,23,42,0.55)" fontSize="9" fontWeight="600" textAnchor="start">
+            Times in {tzLabel} · {tz}
+          </text>
+
           {[0, 1, 2, 3, 4].map((i) => (
             <line key={`g-${i}`} x1={pad} x2={width - pad} y1={pad + (i / 4) * plotH} y2={pad + (i / 4) * plotH} stroke="rgba(15,23,42,0.10)" />
           ))}
@@ -782,9 +809,10 @@ function InteractiveChart({
               <rect key={b.id} x={b.x} y={b.yTop} width={Math.max(2, entryX - b.x)} height={Math.max(1, b.yBot - b.yTop)} fill={b.color} opacity={b.opacity} stroke={b.color} strokeWidth="0.7" />
             ))}
 
-            {/* Structure / liquidity / swings — one clean horizontal line each */}
+            {/* Structure / liquidity / swings — one clean horizontal line each,
+                drawn only up to the entry (no context past the entry datetime) */}
             {lineItems.map((l) => (
-              <line key={l.id} x1={Math.max(pad, l.x)} x2={width - pad} y1={l.y} y2={l.y} stroke={l.color} strokeWidth="0.9" strokeDasharray="5 4" opacity="0.65" />
+              <line key={l.id} x1={Math.max(pad, Math.min(l.x, entryX))} x2={entryX} y1={l.y} y2={l.y} stroke={l.color} strokeWidth="0.9" strokeDasharray="5 4" opacity="0.65" />
             ))}
 
             {slotCount > 0 ? (
@@ -833,9 +861,9 @@ function InteractiveChart({
 
           {/* Entry datetime box (above plot) */}
           <g>
-            <rect x={clamp(entryX - 60, pad, width - pad - 120)} y={pad - 8} width={120} height={16} rx={3} fill="#f8fafc" stroke="#b7791f" />
-            <text x={clamp(entryX, pad + 60, width - pad - 60)} y={pad + 4} fill="#713f12" fontSize="9" textAnchor="middle" fontWeight="bold">
-              {entryDateStr} @ {entryPrice !== null && entryPrice !== undefined ? entryPrice.toFixed(2) : "?"}
+            <rect x={clamp(entryX - 75, pad, width - pad - 150)} y={pad - 8} width={150} height={16} rx={3} fill="#f8fafc" stroke="#b7791f" />
+            <text x={clamp(entryX, pad + 75, width - pad - 75)} y={pad + 4} fill="#713f12" fontSize="9" textAnchor="middle" fontWeight="bold">
+              {entryDateStr} {tzLabel} @ {entryPrice !== null && entryPrice !== undefined ? entryPrice.toFixed(2) : "?"}
             </text>
           </g>
 

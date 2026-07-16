@@ -270,6 +270,7 @@ function fmtHold(minutes: number | null) {
 function strategyDisplayName(strategyId?: string | null, strategyName?: string | null) {
   if (strategyName) return strategyName;
   if (!strategyId) return "-";
+  if (strategyId === "S-ICT-COUNTER-TRADE") return "S-ICT COUNTER TRADE";
   if (strategyId.startsWith("S-CH")) return `S-CH ${strategyId.replace("S-CH", "")}`;
   if (strategyId.startsWith("S")) return `Strategy ${strategyId}`;
   if (strategyId.startsWith("A")) return `A-Series ${strategyId}`;
@@ -305,12 +306,12 @@ function getSymbolMarket(symbol: string): Market {
 export default function BacktestDashboard() {
   const [market, setMarket] = useState<Market>("ALL");
   const [symbol, setSymbol] = useState("ALL");
-  const [strategy, setStrategy] = useState("S01");
+  const [strategy, setStrategy] = useState("S-ICT-COUNTER-TRADE");
   const [direction, setDirection] = useState("ALL");
-  const [targetNo, setTargetNo] = useState("1");
-  const [year, setYear] = useState("ALL");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [targetNo, setTargetNo] = useState("2");
+  const [year, setYear] = useState("2026");
+  const [startDate, setStartDate] = useState("2026-01-01");
+  const [endDate, setEndDate] = useState("2026-06-03");
   const [sizingMode, setSizingMode] = useState<"fixed_risk" | "fixed_qty">("fixed_risk");
   const [initialCapital, setInitialCapital] = useState("100000");
   const [riskUsd, setRiskUsd] = useState("100");

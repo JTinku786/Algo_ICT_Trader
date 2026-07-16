@@ -19,8 +19,16 @@ function epoch(v: string | null): number | null {
 type ObjRow = Record<string, unknown>;
 
 function mapZone(o: ObjRow, kindFallback: string) {
-  const top = num(o.top);
-  const bottom = num(o.bottom);
+  // Structure events (BOS / MSS / CHoCH) carry a single `level` rather than a
+  // top/bottom band — collapse those to a zero-height zone so they still render
+  // as a clean horizontal line.
+  const lvl = num(o.level);
+  let top = num(o.top);
+  let bottom = num(o.bottom);
+  if ((top === null || bottom === null) && lvl !== null) {
+    top = lvl;
+    bottom = lvl;
+  }
   const t = epoch((o.formed_datetime_et as string) || (o.start_datetime_et as string) || (o.bar_timestamp_et as string) || (o.event_datetime_et as string) || null);
   if (top === null || bottom === null || t === null) return null;
   return {
@@ -254,14 +262,43 @@ export async function GET(request: NextRequest) {
                   five_min_relevant_fvg AS fvg_5m,
                   five_min_relevant_liquidity_levels AS liq_5m,
                   five_min_relevant_swings AS sw_5m,
-                  five_min_relevant_bos_mss_choch AS bos_5m
+                  five_min_relevant_bos_mss_choch AS bos_5m,
+                  fifteen_min_relevant_order_block AS ob_15m,
+                  fifteen_min_relevant_fvg AS fvg_15m,
+                  fifteen_min_relevant_liquidity_levels AS liq_15m,
+                  fifteen_min_relevant_swings AS sw_15m,
+                  fifteen_min_relevant_bos_mss_choch AS bos_15m,
+                  thirty_min_relevant_order_block AS ob_30m,
+                  thirty_min_relevant_fvg AS fvg_30m,
+                  thirty_min_relevant_liquidity_levels AS liq_30m,
+                  thirty_min_relevant_swings AS sw_30m,
+                  thirty_min_relevant_bos_mss_choch AS bos_30m,
+                  one_hour_relevant_order_block AS ob_1h,
+                  one_hour_relevant_fvg AS fvg_1h,
+                  one_hour_relevant_liquidity_levels AS liq_1h,
+                  one_hour_relevant_swings AS sw_1h,
+                  one_hour_relevant_bos_mss_choch AS bos_1h,
+                  daily_relevant_order_block AS ob_d,
+                  daily_relevant_fvg AS fvg_d,
+                  daily_relevant_liquidity_levels AS liq_d,
+                  daily_relevant_swings AS sw_d,
+                  daily_relevant_bos_mss_choch AS bos_d,
+                  weekly_relevant_order_block AS ob_w,
+                  weekly_relevant_fvg AS fvg_w,
+                  weekly_relevant_liquidity_levels AS liq_w,
+                  weekly_relevant_swings AS sw_w,
+                  weekly_relevant_bos_mss_choch AS bos_w
            FROM realtime_production_ict_strategy_met_execution
            WHERE signal_hash = $1 LIMIT 1`,
           [sigId],
         );
         if (sigRes.rowCount) {
           const s = sigRes.rows[0];
-          const inWindow = (t: number | null) => t === null || (t >= fromSec - stepSec && t <= toSec + stepSec);
+          // Higher-timeframe context (30m/1h liquidity sweeps, MSS/BOS, order
+          // blocks) forms hours-to-days before the entry, well before the narrow
+          // 5m candle window. Only exclude anything that happens AFTER the entry;
+          // keep everything at/before it regardless of how early it formed.
+          const inWindow = (t: number | null) => t === null || t <= filledSec + stepSec;
           const extractZones = (col: unknown, kind: string) => {
             const items = ((col as Record<string, unknown>)?.recent_10_order_blocks
               || (col as Record<string, unknown>)?.recent_10_fvgs
@@ -278,11 +315,20 @@ export async function GET(request: NextRequest) {
             ];
             return items.map((x) => mapLevel(x, kind)).filter((z) => z && inWindow(z.time));
           };
-          overlays.timeframe_5m["order_blocks"] = extractZones(s.ob_5m, "order_block");
-          overlays.timeframe_5m["fvgs"] = extractZones(s.fvg_5m, "fvg");
-          overlays.timeframe_5m["liquidity"] = extractLevels(s.liq_5m, "liquidity");
-          overlays.timeframe_5m["swings"] = extractLevels(s.sw_5m, "swing");
-          overlays.timeframe_5m["structure"] = extractZones(s.bos_5m, "structure");
+          const fillTf = (tfKey: "timeframe_5m" | "timeframe_15m" | "timeframe_30m" | "timeframe_1h" | "timeframe_daily" | "timeframe_weekly",
+            ob: unknown, fvg: unknown, liq: unknown, sw: unknown, bos: unknown) => {
+            overlays[tfKey]["order_blocks"] = extractZones(ob, "order_block");
+            overlays[tfKey]["fvgs"] = extractZones(fvg, "fvg");
+            overlays[tfKey]["liquidity"] = extractLevels(liq, "liquidity");
+            overlays[tfKey]["swings"] = extractLevels(sw, "swing");
+            overlays[tfKey]["structure"] = extractZones(bos, "structure");
+          };
+          fillTf("timeframe_5m", s.ob_5m, s.fvg_5m, s.liq_5m, s.sw_5m, s.bos_5m);
+          fillTf("timeframe_15m", s.ob_15m, s.fvg_15m, s.liq_15m, s.sw_15m, s.bos_15m);
+          fillTf("timeframe_30m", s.ob_30m, s.fvg_30m, s.liq_30m, s.sw_30m, s.bos_30m);
+          fillTf("timeframe_1h", s.ob_1h, s.fvg_1h, s.liq_1h, s.sw_1h, s.bos_1h);
+          fillTf("timeframe_daily", s.ob_d, s.fvg_d, s.liq_d, s.sw_d, s.bos_d);
+          fillTf("timeframe_weekly", s.ob_w, s.fvg_w, s.liq_w, s.sw_w, s.bos_w);
           overlays.bias = { weekly: s.weekly_bias ?? null, daily: s.daily_bias ?? null, one_hour: s.one_hour_bias ?? null };
         }
       } catch {
