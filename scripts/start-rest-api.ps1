@@ -15,7 +15,8 @@ $env:POSTGRES_HOST = if ($env:POSTGRES_HOST) { $env:POSTGRES_HOST } else { "172.
 $env:POSTGRES_PORT = if ($env:POSTGRES_PORT) { $env:POSTGRES_PORT } else { "5432" }
 $env:POSTGRES_DATABASE = if ($env:POSTGRES_DATABASE) { $env:POSTGRES_DATABASE } else { "titania_trading" }
 $env:POSTGRES_USER = if ($env:POSTGRES_USER) { $env:POSTGRES_USER } else { "postgres" }
-$env:POSTGRES_PASSWORD = if ($env:POSTGRES_PASSWORD) { $env:POSTGRES_PASSWORD } else { "REMOVED_USE_postgres-password.local" }
+$PasswordFile = Join-Path $Root "backend\postgres-password.local"
+$env:POSTGRES_PASSWORD = if ($env:POSTGRES_PASSWORD) { $env:POSTGRES_PASSWORD } elseif (Test-Path $PasswordFile) { (Get-Content -Raw $PasswordFile).Trim() } else { throw "Set POSTGRES_PASSWORD or create backend\postgres-password.local" }
 $env:POSTGRES_SSLMODE = if ($env:POSTGRES_SSLMODE) { $env:POSTGRES_SSLMODE } else { "disable" }
 
 Set-Location (Join-Path $Root "backend")
