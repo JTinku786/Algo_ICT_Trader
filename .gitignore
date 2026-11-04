@@ -61,3 +61,8 @@ next-env.d.ts
 !.env.example
 
 _to_delete/
+
+# keep-alive watchdog logs
+logs/bridge-keepalive.log*
+logs/rest-api.*.log
+logs/zrok.*.log
