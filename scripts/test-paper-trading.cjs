@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),ts=require('typescript'),Module=require('node:module');
+const m=new Module('paper');m._compile(ts.transpileModule(fs.readFileSync('src/lib/paper-trading.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,'paper.cjs');const {paperResult}=m.exports;
+const trade={direction:'BUY',entry:100,stop:95,target:110,quantity:2,placedAt:10};
+const bar=(knownAt,o,h,l,c)=>({knownAt,o,h,l,c});
+assert.equal(paperResult(trade,[bar(10,100,120,80,100)]).status,'Open');
+assert.equal(paperResult(trade,[bar(11,100,111,94,105)]).pnl,-10);
+assert.match(paperResult(trade,[bar(11,100,111,94,105)]).status,/ambiguous/);
+assert.equal(paperResult(trade,[bar(11,90,94,89,92)]).pnl,-20);
+assert.equal(paperResult(trade,[bar(11,100,111,99,110)]).pnl,20);
+assert.equal(paperResult({...trade,closedAt:12,closePrice:103},[bar(11,100,104,99,102)]).status,'Open');
+assert.equal(paperResult({...trade,closedAt:12,closePrice:103},[bar(12,102,104,99,103)]).pnl,6);
+assert.equal(paperResult({...trade,direction:'SELL',stop:105,target:90},[bar(11,100,101,89,90)]).pnl,20);
+console.log('Paper trading causal exits, ambiguity, gaps, rewind and short checks passed');

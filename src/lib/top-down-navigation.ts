@@ -1,0 +1,1 @@
+export type TopDownTrade = { orderId: string; symbol: string; strategyId: string | null; direction: string | null; entryTs: string | null; entry: number | null; stop: number | null; targetNo?: string; target: number | null };

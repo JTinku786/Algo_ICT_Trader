@@ -1,0 +1,6 @@
+accounts.local.json
+env.cmd
+logs/
+*.log
+__pycache__/
+_to_delete/

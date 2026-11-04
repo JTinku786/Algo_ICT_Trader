@@ -1,0 +1,9 @@
+# Existing-array retest mode
+
+Dashboard default: **CHOCH or CISD candidate** confirmation and **Existing + shift displacement arrays** timing. Native close and wick CHOCH and strict Formation only remain selectable. API requests omitting arrayScope retain FORMATION for backwards compatibility; the dashboard sends EXISTING explicitly.
+
+Existing mode permits selected same-direction arrays whose original anchor predates the broken candle and whose activation is already known by shift confirmation. They must not be invalidated before entry. It also permits a native FVG with its middle candle at or before the break candle to finish its third candle after confirmation. This exception does not admit unrelated later FVGs, later-origin arrays, or delayed OB/IFVG/breaker activation. Every entry starts on or after max(array knownAt, shift knownAt), on a subsequent completed candle; no retroactive entry on an array's forming candle.
+
+Verified August 5, 2026 EURUSD hourly → one minute: CISD candidate breaks at 13:15, known 13:16 New York. The 1.15443–1.15449 bullish FVG anchors at 13:14, uses the 13:15 displacement as middle candle and becomes known at 13:17. Its first subsequent retest candle is 13:17, entry 1.15449. Strict formation mode still excludes that gap. This is a separately labelled CISD investigation, not a newly certified native package CHOCH. The hourly context requirement remains unchanged.
+
+Validation: TypeScript, ESLint, live API assertions for strict exclusion, existing pre-shift arrays, activation/confirmation timing, retirement and origin filtering; browser verification of defaults, matching CISD story, exact bullish FVG and retest. Evidence: public/reports/mss-existing-arrays-evidence.json and mss-existing-arrays-fixed.png. Run node scripts/test-mss-existing-arrays.cjs against the local server.

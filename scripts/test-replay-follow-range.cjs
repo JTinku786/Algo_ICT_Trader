@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),ts=require('typescript'),Module=require('node:module');
+const m=new Module('follow-range');m._compile(ts.transpileModule(fs.readFileSync('src/lib/replay-follow-range.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,'follow-range.cjs');
+const {replayFollowRange}=m.exports;
+assert.equal(replayFollowRange([],0.01),null);
+assert.deepEqual(replayFollowRange([{h:110,l:100}],.01),{minValue:98,maxValue:112.2});
+const bars=[{h:1000,l:1},...Array.from({length:80},()=>({h:110,l:100}))];
+assert.deepEqual(replayFollowRange(bars,.01),{minValue:98,maxValue:112.2});
+bars.push({h:120,l:90});assert.deepEqual(replayFollowRange(bars,.01),{minValue:88.2,maxValue:122.4});
+assert.deepEqual(replayFollowRange([{h:0,l:0}],.01),{minValue:-.01,maxValue:.01});
+console.log('PASS: dynamic high and low, latest 80 only, 2 percent padding, empty and flat range');

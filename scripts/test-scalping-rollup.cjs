@@ -1,0 +1,34 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript');
+const code=ts.transpileModule(fs.readFileSync('src/lib/minute-rollup.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+const sandbox={exports:{}};vm.runInNewContext(code,sandbox);
+const roll=sandbox.exports.rollupTenMinuteBars;
+const bar=(minute,overrides={})=>({t:minute*60000,knownAt:minute*60000+300000,day:'2026-01-29',minute,o:1,h:3,l:0,c:2,v:10,...overrides});
+assert.equal(roll([bar(0),bar(5)]).length,1);
+const result=roll([bar(0),bar(5,{c:2.5,h:4,v:20})])[0];
+assert.equal(result.knownAt,600000);assert.equal(result.o,1);assert.equal(result.c,2.5);assert.equal(result.h,4);assert.equal(result.v,30);
+assert.equal(roll([bar(0)]).length,0,'partial bucket omitted');
+assert.equal(roll([bar(0),bar(10)]).length,0,'missing interior candle omitted');
+assert.equal(roll([bar(0),bar(5,{knownAt:599999})]).length,0,'uncompleted source omitted');
+assert.equal(roll([bar(0),bar(0),bar(5)]).length,0,'duplicate timestamp fails closed');
+console.log('10m rollup: OHLCV, activation clock, gap, partial and duplicate checks passed');
+
+const developingCode=ts.transpileModule(fs.readFileSync('src/lib/replay-developing.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+const developingSandbox={exports:{},require:()=>({weekStart:()=>''})};vm.runInNewContext(developingCode,developingSandbox);
+const develop=developingSandbox.exports.developingReplayBar;
+const one=(minute,c=2)=>bar(minute,{knownAt:(minute+1)*60000,c});
+const forming=develop('15m',[one(0),one(1,4),one(2,99)],[],[],120000,0,1);
+assert.equal(forming.c,4,'unrevealed 1m close excluded from developing TF1');
+assert.equal(forming.o,1);assert.equal(forming.t,0);
+assert.equal(develop('15m',[one(1)],[],[],120000,0,1),null,'missing bucket open fails closed');
+assert.equal(develop('15m',[one(0),one(2)],[],[],180000,0,1),null,'missing 1m interior fails closed');
+assert.equal(develop('15m',[one(0)],[],[one(0)],60000,0,1),null,'completed native bar not duplicated');
+console.log('1m TF2 developing TF1: revealed-only, leading/interior gaps and native deduplication passed');
+
+const wireCode=ts.transpileModule(fs.readFileSync('src/lib/scalping-wire.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+const wireSandbox={exports:{}};vm.runInNewContext(wireCode,wireSandbox);
+const decode=wireSandbox.exports.decodeScalpingResponse;
+const shared=decode({encoding:'scalping-object-graph-v1',nodes:[['o',{price:1.2}],['a',[{$:0},{$:0}]],['o',{entries:{$:1}}]],root:{$:2},meta:{success:true}});
+assert.equal(shared.success,true);assert.equal(shared.entries[0].price,1.2);assert.equal(shared.entries[0],shared.entries[1]);
+assert.throws(()=>decode({encoding:'scalping-object-graph-v1',nodes:[['a',[{$:3}]]],root:{$:0}}),/Invalid evidence reference/);
+console.log('Wire decoder: shared evidence, metadata and invalid-reference checks passed');

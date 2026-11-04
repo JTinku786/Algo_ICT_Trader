@@ -1,0 +1,27 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),Module=require('node:module'),ts=require('typescript');
+function load(file){const filename=path.resolve(file),m=new Module(filename,module);m.filename=filename;m.paths=module.paths;m.require=name=>name==='./scalping-chart-evidence'?load('src/lib/scalping-chart-evidence.ts'):Module.prototype.require.call(m,name);m._compile(ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,filename);return m.exports;}
+const {scalpingOrderSnapshot}=load('src/lib/scalping-order-chart.ts');
+const bars=Array.from({length:14},(_,i)=>({t:i*1000,knownAt:(i+1)*1000,o:100,h:103,l:99,c:102}));
+const proof={context:{id:'1h:OB:1000:1',kind:'OB',tf:'1h',low:99,high:103,origin:1000,knownAt:4000,direction:'BUY'},array:{id:'5m:IFVG:3000:1',kind:'IFVG',tf:'5m',low:100,high:102,origin:3000,knownAt:6000,direction:'BUY',lineage:'5m:FVG:3000:-1'},touch:bars[4],confirmation:{origin:2000,at:6000,knownAt:7000,label:'CHOCH',level:102},plan:{stopAt:4000,sweepSources:[{id:'raid',kind:'SSL',tf:'5m',level:99,knownAt:3000}],targetSource:{id:'target',kind:'BSL',tf:'5m',low:105,knownAt:5000},targetCandidates:[{id:'future',kind:'BSL',tf:'5m',low:110,knownAt:15000}]},validFvg:{VALID_FVG_TF2:{valid:true,reason:'DISCOUNT',range:{low:97,high:105,equilibrium:101,lowOrigin:1000,highOrigin:4000,knownAt:7000}}}};
+const trade={id:'fixture',symbol:'AAPL',market:'us',side:'BUY',entryAt:8000,entryKnownAt:9000,exitAt:12000,entry:101,stop:98,target:105,result:'LOSS',r:-1};
+const input={trade,proof,bars,frame:'TF2',cutoff:9000,outcome:false,allTargets:true};
+const entry=scalpingOrderSnapshot(input),bucket=entry.overlays.timeframe_5m;
+assert.equal(entry.timeframe,'5m');assert.ok(entry.saved_evidence);
+assert.equal(entry.candles.at(-1).time,8);assert.equal(entry.order.close_ts,null);
+assert.equal(entry.overlays.ipda.eq50,101);assert.equal(entry.overlays.ipda.selected_level,'DISCOUNT');
+assert.ok(bucket.fvgs.some(z=>z.kind==='ifvg'&&z.top===102&&z.time===6));
+assert.ok(bucket.fvgs.some(z=>z.zone_role==='source_fvg'&&z.time===3&&z.end_time===6&&z.polarity==='bearish'));
+assert.ok(bucket.structure.some(z=>z.label.includes('CHOCH')&&z.time===2&&z.end_time===6));
+assert.ok(bucket.structure.some(z=>z.label==='TF1 ARRAY TOUCH'));
+assert.ok(!bucket.liquidity.some(z=>z.level===110));
+assert.ok(!bucket.structure.some(z=>z.label.includes('SL HIT')));
+assert.deepEqual(entry.overlays.timeframe_1h,{});
+const high=scalpingOrderSnapshot({...input,frame:'TF1'});
+assert.equal(high.timeframe,'1h');assert.ok(high.overlays.timeframe_1h.order_blocks.some(z=>z.top===103));
+assert.ok(high.overlays.timeframe_1h.liquidity.some(l=>l.label.includes('BODY 50%')&&l.level===101));
+const closed=scalpingOrderSnapshot({...input,cutoff:13000,outcome:true});
+assert.ok(closed.overlays.timeframe_5m.structure.some(z=>z.label==='LOSS · SL HIT'&&z.top===98&&z.time===12));
+assert.equal(closed.order.realized_r,-1);
+assert.equal(proof.array.kind,'IFVG');
+console.log('Shared OrderChart adapter: native TF buckets, exact zones, lineage, body midpoint, range, replay cutoff and loss exit pass.');

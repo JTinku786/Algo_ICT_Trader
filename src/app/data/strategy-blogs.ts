@@ -32,6 +32,123 @@ const h = (text: string): BlogBlock => ({ t: "h", text });
 
 export const STRATEGY_BLOGS: StrategyBlog[] = [
   {
+    id: "s01-v3-weekly-daily-bias", code: "S01-V3", title: "S01 V3 — Daily HTF Bias",
+    subtitle: "An isolated S01 V2 execution engine with confirmed Daily directional permission.",
+    category: "Core Automation", markets: "Available US stocks plus SPY and QQQ",
+    session: "Inherited S01 V2 execution sessions", timeframes: "Daily bias · Weekly/Monthly context · 5m execution",
+    tags: ["Daily Bias", "Causal", "Research"], readMins: 3,
+    blocks: [
+      p("Daily direction alone authorizes BUY or SELL. Weekly and Monthly direction are descriptive context and cannot authorize or veto a trade. Neutral Daily evidence blocks new setups."),
+      h("Completed Daily evidence"),
+      ul(["Use the latest known confirmed Daily structure break, or confirmed swing progression when no structure break exists.", "Pivots use two bars on each side and become available only after confirmation. Candle colour alone does not supply direction.", "Daily direction is frozen at the session open; no forming Daily candle or future confirmation enters the decision.", "No additional HTF array, Daily reaction, opposing-array failure or HTF objective condition gates entry."]),
+      p("S01 V2 sweep, displacement, MSS, 5m PD-array entry, 1H/30m execution trend veto, stops, targets, next-bar fills and exits remain intact. Weekly/Monthly conflict alone cannot block a Daily-permitted setup."),
+      h("Research scope"),
+      p("The initial Weekly/Daily V3 smoke produced 19 sweep candidates and zero orders. Revision s01v3-daily-spec-1.1 replaces that permission policy with Daily direction only. The Backtest card identifies the published revision and shows its actual run counts. A separate V2 control uses identical source history for a fair comparison; this control is not a change to the original published V2 run."),
+    ],
+  },
+  {
+    id: "ts01-2022-mentorship", code: "TS01-TB", title: "2022 ICT Mentorship — Textbook Baseline",
+    subtitle: "A frozen, causal implementation of the 2022 mentorship sequence, retained exactly as the research baseline even though it failed promotion metrics.",
+    category: "Core Automation", markets: "SPY · QQQ · Nifty50 · BankNifty spot-index study",
+    session: "US 09:30–11:00 ET · India 09:15–11:00 IST", timeframes: "Weekly/Daily context · 15M/5M liquidity · 5M execution",
+    tags: ["2022 Mentorship", "Liquidity Raid", "MSS", "FVG", "Consequent Encroachment"], readMins: 6,
+    blocks: [
+      p("TS01-TB is the approved textbook-first baseline for the ICT 2022 Mentorship. It is intentionally frozen at revision 2: the website reports what the deterministic backtest produced and does not rewrite rules after seeing the result."),
+      h("The causal sequence"),
+      seq([
+        "Use completed Daily candles to establish direction from a confirmed Daily swing break that also creates a same-direction Daily FVG.",
+        "Select one unique nearest, still-unraided Daily/Weekly swing-liquidity objective in that direction.",
+        "Require price to raid a fresh opposing liquidity pool during the approved local session window.",
+        "After the raid, require a completed 5m close through the last confirmed pre-raid swing plus a same-direction, non-zero 5m FVG.",
+        "Activate the FVG midpoint (CE) only after candle three closes; the first later 5m retracement may fill it.",
+        "Place the stop one analysis tick beyond the raid extreme and select three distinct, pre-activation real-liquidity targets.",
+      ]),
+      h("Target and outcome contract"),
+      ul([
+        "T1 is the nearest real liquidity target in [1R, 2R), with a 1.5R minimum.",
+        "T2 is the nearest real liquidity target in [2R, 4R).",
+        "T3 is the nearest real liquidity target at 4R or greater; projected target prices are forbidden.",
+        "Allocation is one third per target. The original stop remains; no breakeven move or trailing rule is added.",
+        "Same-bar ambiguity is resolved stop-first. Open legs are UNRESOLVED_SESSION_END and are not fabricated as wins or losses.",
+      ]),
+      { t: "callout", tone: "warn", text: "Research verdict: this exact baseline completed successfully but failed the promotion gate. Forty-eight fully resolved fills produced -30.7432R. It is displayed for audit and research, not as a live-ready claim." },
+      { t: "callout", tone: "info", text: "Nifty50 and BankNifty results are spot-index signal studies using approved analysis increments; they are not simulated broker-instrument fills." },
+    ],
+  },
+  {
+    id: "igs01v2-london-sweep-reversal", code: "IGS01V2", title: "IGS01 V2 — London Killzone Sweep Reversal",
+    subtitle: "Forex 1m. A liquidity pool is raided, the raid fails, and you enter on the candle that closes back inside. No FVG, no inversion, no retrace, no clock.",
+    category: "Core Automation", markets: "12 FX pairs · 1-minute Barchart data stored in New York time",
+    session: "London killzone 02:00–05:00 America/New_York · one setup per killzone",
+    timeframes: "1m detection · 1m execution",
+    tags: ["Liquidity Pool", "Sweep Reversal", "London Killzone", "Forex", "Close-Confirmed Stop"], readMins: 8,
+    blocks: [
+      p("IGS01 V2 is the sweep-reversal build of the London liquidity-grab family. One instrument, one session, one setup — or nothing. Two filters, a stop that never moves, and three targets measured independently. It is a backtest specification: nothing here is validated for live capital."),
+      h("The trade"),
+      seq([
+        "Find resting liquidity — a cluster of roughly equal highs (or equal lows) on the 1-minute chart. Everyone positioned against that level holds a stop just beyond it. That is the pool.",
+        "Wait for the raid — price pushes through the level and takes those stops out.",
+        "Wait for the raid to fail — a candle closes back inside the pool. Whoever pushed through could not hold it.",
+        "Enter on that candle's close, in the direction of the failure. An upward raid that fails is a sell.",
+        "Stop at the extreme of the raid — the furthest point price reached. If price returns there, liquidity was taken and held, and the premise is dead.",
+      ]),
+      p("No fair value gaps, no inversions, no retracement. V1 required an IFVG retrace and measurement showed that step was inverting the signal: it returned −3.54R against a +14.44R mirror, while entering on the rejection close returned +30.12R against a −14.59R mirror, sign-stable in both halves of the year. Demanding a retrace into the inverted gap selects the sweeps price came BACK toward, and a real raid leaves and does not look back."),
+      h("The two filters"),
+      { t: "kv", rows: [
+        ["MIN_REJECTION_PIPS", "5.0 pips. The failure candle must close at least 5 pips back inside the pool, measured from the raid's extreme. That distance does two jobs: it measures how decisively price rejected, and — because the stop sits at that extreme — it is also the stop distance, so it refuses trades too tight to survive the spread."],
+        ["KZ_ENTRY_DEADLINE", "04:45 New York. No entry after 04:45. The killzone closes at 05:00; a setup confirming at 04:52 is structurally valid but has no session left to deliver, and the next real participation is the NY open two hours later. Measured at the FILL, not at the raid."],
+      ] },
+      p("Both cleared the same bar before going in: the cohort each one removes was negative in both halves of the year. For the deadline that was six out of six across the three targets. These are the only two fitted parameters, and they were fitted on the 2026 population."),
+      h("The stop — and it never moves"),
+      { t: "kv", rows: [
+        ["Placement", "The raid extreme. Structural, not a percentage. Its violation means liquidity was taken and held, so the reason for the trade no longer exists. No percentage floor: 2% of price is roughly 233 pips on EURUSD."],
+        ["Trigger and fill", "Close-confirmed. A bar must CLOSE beyond the stop, and you exit at that close, not at the stop price. More realistic than assuming a clean fill, but it means the loss is NOT capped at 1R: roughly 44% of trades lose more than their nominal risk."],
+      ] },
+      { t: "callout", tone: "warn", text: "Never move it to breakeven. This contradicts standard advice, so it was measured: moving to breakeven after the first target raised the win rate by 13 points and lost 16R while increasing drawdown. Trailing was worse still. The return lives in the trades that reach the far target, and a breakeven stop scratches those out during the pullback that precedes the move — so the curve loses the upward drift that was absorbing the losses. It is a worse strategy that feels better." },
+      h("The three targets"),
+      ul([
+        "TP1 — 1–2R, the near target.",
+        "TP2 — 2–4R, the middle target.",
+        "TP3 — 4R+, the runner.",
+      ]),
+      p("Chosen from the PD arrays sitting in front of the trade and bucketed by reward-to-risk. Each is measured separately, against the same entry and the same stop — there is no fitted split of the position across them. An earlier build carried one and it was removed: the “best” split moved depending on which spread assumption was used, and a parameter that swings on an unmeasured assumption is not a finding. Scaling out is a decision for whoever trades it, with all three numbers in view. There is no time limit: a trade ends only when a target or a stop is hit, never on a clock."),
+      h("Money management"),
+      { t: "kv", rows: [
+        ["Risk per trade", "0.50% of equity. Argued from the drawdown distribution, not from expectancy. At 1.00% a 1-in-100 stretch runs past 21% — which is where people stop following the plan, and a strategy abandoned at the bottom of a drawdown has a negative expectancy no backtest will show."],
+        ["Daily risk cap", "3% per session. Insurance, not a correction. Same-day trades are near-independent (pairwise outcome correlation +0.019, sign agreement 48.2% against 50%). But on 72.5% of sessions every USD-legged trade points the same way against the dollar, so one dollar shock could hit the whole book. It has never happened in this sample — which is why it is insured rather than assumed away."],
+        ["Concurrent trades", "No cap. Every count cap tested (5, 4, 3 per session) lowered return more than it lowered drawdown. Once outcomes are uncorrelated, cutting trades cuts the sample, not the risk."],
+      ] },
+      h("Deliberately not in the strategy"),
+      { t: "kv", rows: [
+        ["IFVG / inversion / retrace entry", "Measured −3.54R against a +14.44R mirror — the step was inverting the signal."],
+        ["Noise-sweep screen", "Rejected shallow-and-fast raids. Its sign flipped between the two halves of the year, and the cohort it removed was worth roughly nothing (+3.2R over 81 trades) rather than being negative. A rule that cannot be defended in both halves of its own sample will surprise you live."],
+        ["Target allocation", "A fitted split of the position across TP1/TP2/TP3. At a flat 0.5-pip spread the choice looked like pure noise; at per-symbol realistic spreads it looked decisive. The answer depended on an assumption nobody has measured, so it was removed rather than defended."],
+        ["Breakeven and trailing stops", "Both measured worse on return AND on drawdown at every allocation and every cost level."],
+        ["Dropping the weak pairs", "GBPUSD, USDCHF and EURGBP look bad and cutting them lifts per-trade R from 0.46 to 0.58. But the variance ratio is 1.34 (borderline), the label-shuffle p-value is 0.11 (not significant), and GBPUSD's sign flips between halves. That is selection bias, not edge."],
+        ["Metals (XAUUSD / XAGUSD)", "Not quoted in pips, so MIN_REJECTION_PIPS has no meaning on them and every R multiple would be nonsense."],
+      ] },
+      h("The 2017–2025 held-out result"),
+      p("Both fitted parameters were chosen on the 2026 population, so 2017–2025 is genuinely out of sample: 9,044 trades across 9 years and 12 pairs, net of assumed costs, with unresolved legs excluded rather than booked."),
+      { t: "kv", rows: [
+        ["TP1", "50.9% win · +1,118.3R · +0.124R per trade · profit factor 1.205"],
+        ["TP2", "36.7% win · +2,071.0R · +0.229R per trade · profit factor 1.293"],
+        ["TP3", "22.2% win · +3,064.6R · +0.339R per trade · profit factor 1.350"],
+      ] },
+      ul([
+        "All nine years positive, and all twelve pairs positive.",
+        "Executability holds: none of the 9,044 stops is under 2 pips, median 8.5 — the edge is not hiding inside the spread.",
+        "Per-trade R decays 39–44% against the fitted 2026 sample. That is the size of the fitting premium, and it is the number to plan against, not the 2026 one.",
+      ]),
+      { t: "callout", tone: "warn", text: "The mirror test has not been run. Replay every setup with the direction reversed — same bar, same entry price, same risk distance, targets reflected — and see whether the flipped book also makes money. If it does, the profit belongs to the payoff geometry (a stop at the raid extreme, a close-confirmed exit, targets in multiples of a small risk unit) and not to the ICT sequence. This is not hypothetical: it is precisely how V1 was parked. V1 returned −7.37R against a mirror of +29.25R, and the sign of the difference flipped between halves of the sample." },
+      ul([
+        "Drawdown is real. The TP2 book gives back 69R peak to trough with a 19-trade losing streak — about 34% of the account at 0.5% risk per trade. The TP3 book is over 50%.",
+        "TP3 is outlier-sensitive. Removing its fifty best winners leaves 56% of the total; doing the same to TP2 leaves 91%. TP2 is the robust column.",
+        "Costs are assumptions. Spreads are per-symbol estimates, not the broker's own history, and the JPY crosses — roughly 60% of the population — carry both the widest assumed cost and the weakest results.",
+      ]),
+      { t: "callout", tone: "info", text: "Provenance: detection igs01v2_london_liqgrab_sweepreversal.detect(), execution igs01v2_execution_updated (next-bar-open fill, monitoring from the bar after the fill, static close-confirmed structural stop, 2R touch hard stop, no time limit, 30-day forward search). Source table public.igs01v2_backtest_legs, run tags hist_2017_2025 and tieout_2026, republished to the dashboard's updated pipeline. 1-minute Barchart data stored in New York time. Nothing here is validated for live capital." },
+    ],
+  },
+  {
     id: "s01", code: "S01", title: "Bread & Butter Buy/Sell",
     subtitle: "Weekly/Daily bias + a Judas raid around the True Session Open, displacement, MSS, and a PD-array retracement entry.",
     category: "Core Automation", markets: "US indices & equities · Indian equities/indices",
@@ -173,7 +290,7 @@ export const STRATEGY_BLOGS: StrategyBlog[] = [
         "Enter on the retest of that OB/FVG in the correct premium/discount.",
         "Stop beyond the sweep extreme; target the opposing liquidity.",
       ]),
-      { t: "callout", tone: "info", text: "S16 is what the Machine Learning tab scores: a CatBoost/XGBoost model estimates p(TP2 before SL) so trades can be gated by probability, lifting win rate and roughly halving drawdown at higher thresholds." },
+      { t: "callout", tone: "info", text: "S16 is what the Machine Learning tab scores: a CatBoost model estimates p(TP2 before SL) so trades can be gated by probability. The 2026 ICT-Enhanced champion folds 11 engineered ICT price-action features (5-minute FVG/order-block distance, CVD, ATR, IPDA premium-discount, 52-week range) into the model — the 5-minute FVG distance alone is its single strongest driver. It lifts out-of-sample AUC to 0.788 and, gated at P≥0.60, raises the TP2 hit-rate to 83% while cutting max drawdown from −12.3R to −4.0R. A calibrated 42-feature stable model scores the live order book in shadow mode." },
     ],
   },
   {
@@ -566,6 +683,11 @@ export const STRATEGY_BLOGS: StrategyBlog[] = [
 const CODE_ALIASES: Record<string, string> = {
   "S-CH10": "S11", // SMT Divergence champion
   SCH10: "S11",
+  // The IGS family carries its full engine name as its strategy_id, so every
+  // mention of it in the dashboard has to alias back to the short blog code.
+  // Renamed to IGS01V2 on the dashboard side; the blog keeps its original
+  // `igs01v2` slug so existing links stay valid.
+  IGS01V2_LONDONLIQGRAB_SWEEPREVERSAL: "IGS01V2",
 };
 
 function normalizeCode(value: string | null | undefined): string {

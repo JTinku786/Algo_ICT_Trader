@@ -1,0 +1,6 @@
+const fs=require('node:fs'),ts=require('typescript'),Module=require('node:module'),assert=require('node:assert/strict');const m=new Module('strategy-replay');m._compile(ts.transpileModule(fs.readFileSync('src/lib/strategy-replay.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,'strategy-replay.cjs');const {strategyEvents}=m.exports;
+const order={id:'example',runId:'run',strategy:'S16-V2',direction:'BUY',decisionAt:100,placedAt:100,fillAt:200,entry:10,stop:9,fillPrice:10};
+assert.equal(strategyEvents([order],99).length,0);assert.equal(strategyEvents([order],100).length,1);assert.equal(strategyEvents([order],199).length,1);assert.equal(strategyEvents([order],200).length,2);
+assert.equal(strategyEvents([{...order,fillAt:100}],200).length,1);assert.equal(strategyEvents([{...order,decisionAt:101}],200).length,0);assert.equal(strategyEvents([{...order,decisionAt:null}],200).length,0);assert.equal(strategyEvents([{...order,entry:NaN}],200).length,0);
+assert.deepEqual(strategyEvents([order],100),strategyEvents([{...order,fillAt:900,fillPrice:999}],100));
+console.log('PASS: no placement before decision, no future fill, equal-time conflict withholding, missing decision, malformed prices and rewind/future-fill invariance.');

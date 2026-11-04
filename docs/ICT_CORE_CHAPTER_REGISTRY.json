@@ -1,0 +1,1375 @@
+{
+  "version": "website-integration-v1",
+  "created": "2026-09-30",
+  "scope": "proposed implementation chapters, not asserted official PDF lesson boundaries",
+  "chapters": [
+    {
+      "id": "CC-M01-C01",
+      "month": 1,
+      "title": "Price delivery and the four market conditions",
+      "source_sha256": "03e1f586b91ac94f2cfbad82ee40e572c169f9d03bc16cd3a7978ee29478660d",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 01 - PDF @arjoio\\Month01-September_ICT_Notes.pdf",
+      "anchor_pages": [
+        4,
+        6,
+        9,
+        11,
+        13,
+        15
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M01-C02",
+      "month": 1,
+      "title": "Liquidity, three-bar swings and equilibrium",
+      "source_sha256": "03e1f586b91ac94f2cfbad82ee40e572c169f9d03bc16cd3a7978ee29478660d",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 01 - PDF @arjoio\\Month01-September_ICT_Notes.pdf",
+      "anchor_pages": [
+        17,
+        20,
+        24
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M01-C03",
+      "month": 1,
+      "title": "Fair valuation and replay practice",
+      "source_sha256": "03e1f586b91ac94f2cfbad82ee40e572c169f9d03bc16cd3a7978ee29478660d",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 01 - PDF @arjoio\\Month01-September_ICT_Notes.pdf",
+      "anchor_pages": [
+        28,
+        32
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M02-C01",
+      "month": 2,
+      "title": "Reward, drawdown and expectancy",
+      "source_sha256": "1add1b6298ff25daa104b4cb2974ef357b86d00d0023da3d4359fdc7103a7623",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 02 - PDF @arjoio\\Month02-October_Notes.pdf",
+      "anchor_pages": [
+        4,
+        8,
+        10
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M01"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M02-C02",
+      "month": 2,
+      "title": "HTF location and LTF risk refinement",
+      "source_sha256": "1add1b6298ff25daa104b4cb2974ef357b86d00d0023da3d4359fdc7103a7623",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 02 - PDF @arjoio\\Month02-October_Notes.pdf",
+      "anchor_pages": [
+        25,
+        38,
+        44
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M01"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M02-C03",
+      "month": 2,
+      "title": "Stops, loss recovery and position sizing",
+      "source_sha256": "1add1b6298ff25daa104b4cb2974ef357b86d00d0023da3d4359fdc7103a7623",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 02 - PDF @arjoio\\Month02-October_Notes.pdf",
+      "anchor_pages": [
+        54,
+        57,
+        63,
+        65,
+        73
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M01"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M03-C01",
+      "month": 3,
+      "title": "Monthly to weekly to daily structure",
+      "source_sha256": "cd0532366287ef3f192efc84d8f2e1dd5cd9b8b50e38993a19083776050548c4",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 03 - PDF @arjoio\\Month03-november_notes.pdf",
+      "anchor_pages": [
+        4,
+        12
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M02"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M03-C02",
+      "month": 3,
+      "title": "Institutional sponsorship and lower-frame inspection",
+      "source_sha256": "cd0532366287ef3f192efc84d8f2e1dd5cd9b8b50e38993a19083776050548c4",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 03 - PDF @arjoio\\Month03-november_notes.pdf",
+      "anchor_pages": [
+        49,
+        51
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M02"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M03-C03",
+      "month": 3,
+      "title": "SMT and retail-pattern context",
+      "source_sha256": "cd0532366287ef3f192efc84d8f2e1dd5cd9b8b50e38993a19083776050548c4",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 03 - PDF @arjoio\\Month03-november_notes.pdf",
+      "anchor_pages": [
+        55,
+        58,
+        64,
+        68
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M02"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M04-C01",
+      "month": 4,
+      "title": "Interest-rate triad and intermarket confirmation",
+      "source_sha256": "b6d2db911732707e2516e0cc2e26a37bbb3ed8af3ecad6fd3bdcd02dc38c0b40",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 04 - PDF @arjoio\\Month04-december_study_notes.pdf",
+      "anchor_pages": [
+        4,
+        6,
+        18
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M03"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M04-C02",
+      "month": 4,
+      "title": "Internal/external liquidity and bullish order blocks",
+      "source_sha256": "b6d2db911732707e2516e0cc2e26a37bbb3ed8af3ecad6fd3bdcd02dc38c0b40",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 04 - PDF @arjoio\\Month04-december_study_notes.pdf",
+      "anchor_pages": [
+        19,
+        20
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M03"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M04-C03",
+      "month": 4,
+      "title": "Bias, breakers, rejection and liquidity voids",
+      "source_sha256": "b6d2db911732707e2516e0cc2e26a37bbb3ed8af3ecad6fd3bdcd02dc38c0b40",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 04 - PDF @arjoio\\Month04-december_study_notes.pdf",
+      "anchor_pages": [
+        27,
+        53,
+        66,
+        79
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M03"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M05-C01",
+      "month": 5,
+      "title": "Quarterly shifts and anchored IPDA ranges",
+      "source_sha256": "da7a59ae87c51a0fd2d6ef7b84d06072f24bf3795b8e7c993ca3d87ec4bb8594",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 05 - PDF @arjoio\\Month05-January_2017_Study_Notes.pdf",
+      "anchor_pages": [
+        4,
+        11,
+        12,
+        15,
+        19
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M04"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M05-C02",
+      "month": 5,
+      "title": "Top-down intermarket and seasonal context",
+      "source_sha256": "da7a59ae87c51a0fd2d6ef7b84d06072f24bf3795b8e7c993ca3d87ec4bb8594",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 05 - PDF @arjoio\\Month05-January_2017_Study_Notes.pdf",
+      "anchor_pages": [
+        55,
+        79,
+        92
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M04"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M05-C03",
+      "month": 5,
+      "title": "HTF risk and order execution",
+      "source_sha256": "da7a59ae87c51a0fd2d6ef7b84d06072f24bf3795b8e7c993ca3d87ec4bb8594",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 05 - PDF @arjoio\\Month05-January_2017_Study_Notes.pdf",
+      "anchor_pages": [
+        110,
+        128,
+        147
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M04"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M06-C01",
+      "month": 6,
+      "title": "Market selection and profile",
+      "source_sha256": "9264e93c7fc05a26e7671f711130f58ce04c59f5c6215fb28608bff002100d47",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 06 - PDF @arjoio\\Month06-feb_studynotes.pdf",
+      "anchor_pages": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M05"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M06-C02",
+      "month": 6,
+      "title": "Monthly/weekly/daily PD-array alignment",
+      "source_sha256": "9264e93c7fc05a26e7671f711130f58ce04c59f5c6215fb28608bff002100d47",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 06 - PDF @arjoio\\Month06-feb_studynotes.pdf",
+      "anchor_pages": [
+        25,
+        26,
+        35,
+        41
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M05"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M06-C03",
+      "month": 6,
+      "title": "Trade objectives, partials and execution",
+      "source_sha256": "9264e93c7fc05a26e7671f711130f58ce04c59f5c6215fb28608bff002100d47",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 06 - PDF @arjoio\\Month06-feb_studynotes.pdf",
+      "anchor_pages": [
+        46,
+        57,
+        69,
+        80,
+        89
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M05"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M07-C01",
+      "month": 7,
+      "title": "PD-array hierarchy and HTF sequence",
+      "source_sha256": "269b3cf1d77965d03cd6b203a556101065eea77c1fd9992095fa7f5dd6200896",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 07 - PDF @arjoio\\Month07-march_studynotes.pdf",
+      "anchor_pages": [
+        4,
+        6,
+        11,
+        12
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M06"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M07-C02",
+      "month": 7,
+      "title": "Weekly profiles and reversal scenarios",
+      "source_sha256": "269b3cf1d77965d03cd6b203a556101065eea77c1fd9992095fa7f5dd6200896",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 07 - PDF @arjoio\\Month07-march_studynotes.pdf",
+      "anchor_pages": [
+        22,
+        34,
+        50,
+        99,
+        108
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M06"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M07-C03",
+      "month": 7,
+      "title": "Time/price alignment and failure handling",
+      "source_sha256": "269b3cf1d77965d03cd6b203a556101065eea77c1fd9992095fa7f5dd6200896",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 07 - PDF @arjoio\\Month07-march_studynotes.pdf",
+      "anchor_pages": [
+        67,
+        95,
+        115,
+        116,
+        133
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M06"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M08-C01",
+      "month": 8,
+      "title": "Daily framing, time of day and weekly context",
+      "source_sha256": "e7dbb5dc662ba5adc8da3ec0ef573c551105d0be3b3e54fecb5cc2e86eb9eb11",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 08 - PDF @arjoio\\Month08-april_study_notes.pdf",
+      "anchor_pages": [
+        4,
+        5,
+        6,
+        7,
+        10
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M07"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M08-C02",
+      "month": 8,
+      "title": "Killzones, CBDR and range qualification",
+      "source_sha256": "e7dbb5dc662ba5adc8da3ec0ef573c551105d0be3b3e54fecb5cc2e86eb9eb11",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 08 - PDF @arjoio\\Month08-april_study_notes.pdf",
+      "anchor_pages": [
+        22,
+        32,
+        38,
+        43
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M07"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M08-C03",
+      "month": 8,
+      "title": "Intraday profiles and entry/exit planning",
+      "source_sha256": "e7dbb5dc662ba5adc8da3ec0ef573c551105d0be3b3e54fecb5cc2e86eb9eb11",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 08 - PDF @arjoio\\Month08-april_study_notes.pdf",
+      "anchor_pages": [
+        52,
+        53,
+        64,
+        74,
+        85
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M07"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M09-C01",
+      "month": 9,
+      "title": "Sentiment, entries and daily projections",
+      "source_sha256": "76bec67b6abd505377033622796f4f111983297f5f6115773cf995e993aeedde",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 09 - PDF @arjoio\\Month09-may_studynotes.pdf",
+      "anchor_pages": [
+        4,
+        5,
+        6,
+        14,
+        21
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M08"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M09-C02",
+      "month": 9,
+      "title": "Consolidation, intraday and intraweek reversals",
+      "source_sha256": "76bec67b6abd505377033622796f4f111983297f5f6115773cf995e993aeedde",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 09 - PDF @arjoio\\Month09-may_studynotes.pdf",
+      "anchor_pages": [
+        34,
+        40,
+        53,
+        66
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M08"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M09-C03",
+      "month": 9,
+      "title": "Accumulation/distribution and London-close exits",
+      "source_sha256": "76bec67b6abd505377033622796f4f111983297f5f6115773cf995e993aeedde",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 09 - PDF @arjoio\\Month09-may_studynotes.pdf",
+      "anchor_pages": [
+        58,
+        60,
+        77,
+        79,
+        92,
+        106
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M08"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M10-C01",
+      "month": 10,
+      "title": "Commodity selection, seasonality and COT",
+      "source_sha256": "f3a4596c493bb9397a1ca76a54267964773a338b1f13ef5b844ccee169eb63bc",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 10 - PDF @arjoio\\Month10-june_2017_study_notes.pdf",
+      "anchor_pages": [
+        4,
+        51,
+        63,
+        69,
+        73
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M09"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M10-C02",
+      "month": 10,
+      "title": "Open interest and news-aware analysis",
+      "source_sha256": "f3a4596c493bb9397a1ca76a54267964773a338b1f13ef5b844ccee169eb63bc",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 10 - PDF @arjoio\\Month10-june_2017_study_notes.pdf",
+      "anchor_pages": [
+        74,
+        75,
+        76,
+        99,
+        101
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M09"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M10-C03",
+      "month": 10,
+      "title": "Index SMT, index sessions and equity context",
+      "source_sha256": "f3a4596c493bb9397a1ca76a54267964773a338b1f13ef5b844ccee169eb63bc",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 10 - PDF @arjoio\\Month10-june_2017_study_notes.pdf",
+      "anchor_pages": [
+        126,
+        147,
+        148,
+        151,
+        155,
+        176,
+        186,
+        201
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M09"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M11-C01",
+      "month": 11,
+      "title": "Commodity sectors and fundamentals",
+      "source_sha256": "16b4437c02e58bb4e486ff71feedc3cb9c08d114594baf62e0a61a583f987b75",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 11 - PDF @arjoio\\Month11-july_2017_study_notes.pdf",
+      "anchor_pages": [
+        4,
+        5,
+        6,
+        7,
+        13,
+        18
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M10"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M11-C02",
+      "month": 11,
+      "title": "Forex strength and currency selection",
+      "source_sha256": "16b4437c02e58bb4e486ff71feedc3cb9c08d114594baf62e0a61a583f987b75",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 11 - PDF @arjoio\\Month11-july_2017_study_notes.pdf",
+      "anchor_pages": [
+        21,
+        29,
+        39
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M10"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M11-C03",
+      "month": 11,
+      "title": "Stock screens and bond-market context",
+      "source_sha256": "16b4437c02e58bb4e486ff71feedc3cb9c08d114594baf62e0a61a583f987b75",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 11 - PDF @arjoio\\Month11-july_2017_study_notes.pdf",
+      "anchor_pages": [
+        45,
+        48,
+        51,
+        52
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M10"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M12-C01",
+      "month": 12,
+      "title": "Monthly-to-weekly decision flow",
+      "source_sha256": "eeb5ccbb831739f6bef7faedbf54c760716775c210fcdab93b5167a35b87875c",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 12 - PDF @arjoio\\Month12 - 1 August.pdf",
+      "anchor_pages": [
+        4,
+        11,
+        20
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M11"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M12-C02",
+      "month": 12,
+      "title": "Weekly-to-daily decision flow",
+      "source_sha256": "eeb5ccbb831739f6bef7faedbf54c760716775c210fcdab93b5167a35b87875c",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 12 - PDF @arjoio\\Month12 - 1 August.pdf",
+      "anchor_pages": [
+        21,
+        29,
+        38
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M11"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M12-C03",
+      "month": 12,
+      "title": "Daily-to-4H decision flow",
+      "source_sha256": "eeb5ccbb831739f6bef7faedbf54c760716775c210fcdab93b5167a35b87875c",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 12 - PDF @arjoio\\Month12 - 1 August.pdf",
+      "anchor_pages": [
+        39,
+        47,
+        56
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M11"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M12-C04",
+      "month": 12,
+      "title": "4H-to-5m execution flow",
+      "source_sha256": "eeb5ccbb831739f6bef7faedbf54c760716775c210fcdab93b5167a35b87875c",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 12 - PDF @arjoio\\Month12 - 1 August.pdf",
+      "anchor_pages": [
+        57,
+        65,
+        75,
+        76
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M11"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    },
+    {
+      "id": "CC-M12-C05",
+      "month": 12,
+      "title": "Asset adapters and four model examples",
+      "source_sha256": "eeb5ccbb831739f6bef7faedbf54c760716775c210fcdab93b5167a35b87875c",
+      "source_pdf": "C:\\Users\\saite\\Downloads\\All Core Content Months\\All Core Content Months\\Month 12 - PDF @arjoio\\Month12 - 1 August.pdf",
+      "anchor_pages": [
+        83,
+        84,
+        88,
+        97,
+        98,
+        99,
+        100
+      ],
+      "page_numbering": "physical PDF, 1-based",
+      "source_review": "first-pass text and representative visual anchors; full clause and diagram review pending",
+      "status": "OVERVIEW_AVAILABLE",
+      "rule_version": null,
+      "dependencies": [
+        "CC-M11"
+      ],
+      "required_deliverables": [
+        "original explanation",
+        "source-linked specification",
+        "causal replay examples and counterexamples",
+        "detector contract",
+        "regression fixtures",
+        "strategy/backtest mapping"
+      ],
+      "readiness": {
+        "learn": "ORIGINAL_OVERVIEW_AVAILABLE",
+        "replay": "SHARED_LOCAL_CANDIDATE_REPLAY",
+        "detector": "UNVALIDATED",
+        "backtest": "NOT_RUN",
+        "paper": "NOT_RUN",
+        "live": "NOT_AUTHORIZED_BY_THIS_PLAN"
+      }
+    }
+  ],
+  "updated": "2026-10-01"
+}

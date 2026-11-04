@@ -14,6 +14,7 @@
 /coverage
 test-results/
 output/
+.playwright-cli/
 
 # python
 __pycache__/
@@ -45,6 +46,8 @@ zrok-share*.log
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+backend/titania_assistant/data/*.db
 
 # vercel
 .vercel
@@ -55,3 +58,6 @@ next-env.d.ts
 
 .vercel
 .env*
+!.env.example
+
+_to_delete/

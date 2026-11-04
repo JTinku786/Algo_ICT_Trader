@@ -1,0 +1,16 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),ts=require('typescript');
+const mod={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('src/lib/mss-outcomes.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,{exports:mod.exports,module:mod});
+const {walkOutcome,candleExit}=mod.exports;
+const b=(t,l,h,c)=>({t,knownAt:t+60000,day:'2026-01-21',minute:0,o:c,l,h,c});
+const buy={key:'buy',direction:'BUY',entryAt:0,entry:100,stop:99,target:102};
+const range=[b(0,98,103,100),b(60000,99.5,101.5,101)];
+assert.equal(walkOutcome(buy,range).outcome,'OPEN','entry candle never supplies a future exit');
+assert.equal(walkOutcome(buy,range,'CLOSE_BY_END').outcome,'END');
+assert.equal(walkOutcome(buy,range,'CLOSE_BY_END').r,1);
+const extended=[...range,b(120000,100,102.5,102)];
+assert.equal(walkOutcome(buy,extended).outcome,'WIN');assert.equal(walkOutcome(buy,extended).exitAt,120000);assert.equal(walkOutcome(buy,extended).r,2);
+assert.equal(candleExit(buy,b(60000,98,103,102)).outcome,'LOSS','ambiguous candle stop first');
+const sell={...buy,key:'sell',direction:'SELL',stop:101,target:98};
+assert.equal(walkOutcome(sell,[b(60000,97,100.5,98)]).r,2);
+assert.equal(walkOutcome(sell,[]).outcome,'OPEN','exhausted history cannot fabricate a close');
+console.log('PASS: end-date mark close, future target resolution, entry-candle exclusion, BUY/SELL, same-candle stop first, exhausted history stays OPEN');
