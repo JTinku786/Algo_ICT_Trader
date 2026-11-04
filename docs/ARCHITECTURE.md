@@ -164,7 +164,7 @@ sequenceDiagram
 ## 8. Risks and single points of failure
 
 1. **One workstation** runs Postgres, every strategy, the bridge, the tunnel and the tokens. Sleep, reboot or an outage stops everything, including the Vercel site's data.
-2. **Bridge and zrok are started by hand** — no service or health alert yet.
+2. **Bridge and zrok are kept alive by a scheduled task** (`\Titania\Titania Bridge KeepAlive`: at logon + every 5 min) running `scripts/keep-bridge-alive.ps1`, which checks both every 30 s and restarts whatever is down (log: `logs/bridge-keepalive.log`). It only runs while the user is logged in and the PC is awake.
 3. **Postgres connections:** `max_connections` 100; the runtime caps itself at 40, the proxy pool adds up to 16; cron, Streamlit and backtests are outside any budget.
 4. **Schwab refresh token** every 7 days (interactive); Robinhood OAuth can't renew in the background.
 5. **No site authentication** — the production URL is public (paid Vercel plan planned for password protection).
