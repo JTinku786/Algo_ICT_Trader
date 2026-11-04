@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),ts=require('typescript'),Module=require('node:module');
+const m=new Module('zone-anchor');m._compile(ts.transpileModule(fs.readFileSync('src/lib/replay-zone-anchor.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,'zone-anchor.cjs');
+const {replayZoneAnchor}=m.exports;
+const bars=[{t:100,knownAt:150},{t:150,knownAt:200},{t:200,knownAt:250}];
+const ob={kind:'OB',origin:100,knownAt:250};
+assert.equal(replayZoneAnchor(bars,ob),bars[0]);
+assert.equal(replayZoneAnchor(bars,{...ob,kind:'FVG'}),bars[0]);
+assert.equal(replayZoneAnchor(bars,{...ob,kind:'BREAKER'}),bars[0]);
+assert.equal(replayZoneAnchor(bars,{...ob,kind:'IFVG'}),bars[2]);
+assert.equal(replayZoneAnchor(bars.slice(1),ob),undefined);
+assert.equal(ob.knownAt,250);
+console.log('PASS: OB / FVG / breaker origin anchors, IFVG confirmation anchor, missing-origin withholding and unchanged confirmation time');

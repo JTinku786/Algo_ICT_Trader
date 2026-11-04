@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import {
   BarChart3,
   BookOpen,
@@ -9,6 +10,7 @@ import {
   Clock3,
   Cpu,
   IndianRupee,
+  Layers,
   LineChart,
   LockKeyhole,
   LogOut,
@@ -16,6 +18,7 @@ import {
   Play,
   RadioTower,
   CalendarDays,
+  GitBranch,
   Rows3,
   ActivitySquare,
   Search,
@@ -23,28 +26,64 @@ import {
   SlidersHorizontal,
   Sparkles,
   TrendingUp,
+  Triangle,
   WalletCards,
+  UsersRound,
   Zap,
 } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import AssistantPanel from "./assistant-panel";
 import BacktestDashboard from "./backtest-dashboard";
+import ReversalDashboard from "./reversal-dashboard";
+import ConsolidationDashboard from "./consolidation-dashboard";
+import ExpansionDashboard from "./expansion-dashboard";
+import AmdDashboard from "./amd-dashboard";
 import LiveOrders from "./live-orders";
 import StrategyWorkspace from "./strategy-workspace";
 import RealtimeOrdersDashboard from "./realtime-orders-dashboard";
 import SictStrategyBuilder from "./sict-strategy-builder";
 import MlInsights from "./ml-insights";
+import OptionsLab from "./options-lab";
 import Blogs from "./blogs";
 import { BlogNavProvider } from "./blog-context";
 import type { TradePrefill } from "./trade-navigation";
+import AccountManagement from "./account-management";
+import DailyBiasDashboard from "./daily-bias-dashboard";
+import MarketStructureShift, {type MssResult,type MssFocus} from "./market-structure-shift";
 
-type Tab = "realtime-orders" | "strategy-builder" | "tradezella" | "stonk" | "backtest" | "ml" | "blogs" | "monitoring" | "live-orders" | "deployments";
+const FibCalculation = dynamic(() => import("./fib-calculation"), { ssr: false });
+const ReversalsUpdated = dynamic(() => import("./reversals-updated"), { ssr: false });
+const ScalpingLabs = dynamic(() => import("./scalping-labs"), { ssr: false });
+const SmtDivergence = dynamic(() => import("./smt-divergence"), { ssr: false });
+const TopDownAnalysis = dynamic(() => import("./top-down-analysis"), { ssr: false });
+const IctCoreWorkspace = dynamic(() => import("./ict-core-workspace"), { ssr: false });
+
+type Tab = "reversals-updated" | "fib-calculation" | "scalping-labs" | "market-structure-shift" | "swing-trading" | "smt-divergence" | "top-down" | "ict-core" | "daily-bias" | "realtime-orders" | "account-management" | "strategy-builder" | "options-lab" | "tradezella" | "stonk" | "backtest" | "reversal" | "consolidation" | "expansion" | "amd" | "ml" | "blogs" | "monitoring" | "live-orders" | "deployments";
+
+// Hidden on the public Vercel deployment (set NEXT_PUBLIC_HIDE_ACCOUNT_MGMT=true there; unset locally).
+const HIDE_ACCOUNT_MGMT = process.env.NEXT_PUBLIC_HIDE_ACCOUNT_MGMT === "true";
 
 const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: "smt-divergence", label: "SMC Divergence", icon: GitBranch },
+  { id: "fib-calculation", label: "Fib Calculation", icon: TrendingUp },
+  { id: "scalping-labs", label: "Scalping Labs", icon: Zap },
+  { id: "market-structure-shift", label: "Market Structure Shift", icon: ActivitySquare },
+  { id: "top-down", label: "Top Down Analysis", icon: Layers },
+  { id: "swing-trading", label: "Swing Trading", icon: TrendingUp },
+  { id: "ict-core", label: "ICT Core", icon: BookOpen },
   { id: "realtime-orders", label: "Realtime Orders", icon: ActivitySquare },
+  ...(HIDE_ACCOUNT_MGMT ? [] : [{ id: "account-management" as Tab, label: "Account Management", icon: UsersRound }]),
   { id: "strategy-builder", label: "Strategy Builder", icon: SlidersHorizontal },
+  { id: "options-lab", label: "Options Lab", icon: Layers },
   { id: "tradezella", label: "Trade Journal", icon: CalendarDays },
   { id: "stonk", label: "Stonk Ledger", icon: Rows3 },
+  { id: "daily-bias", label: "Daily Bias", icon: TrendingUp },
   { id: "backtest", label: "Backtest", icon: BarChart3 },
+  { id: "reversal", label: "Reversal", icon: GitBranch },
+  { id: "reversals-updated", label: "Reversals updated", icon: GitBranch },
+  { id: "consolidation", label: "Consolidation", icon: Layers },
+  { id: "expansion", label: "Expansion", icon: TrendingUp },
+  { id: "amd", label: "AMD", icon: Triangle },
   { id: "ml", label: "Machine Learning", icon: Cpu },
   { id: "blogs", label: "Strategy Blogs", icon: BookOpen },
   { id: "monitoring", label: "Monitoring", icon: MonitorDot },
@@ -57,11 +96,18 @@ function classNames(...items: Array<string | false | null | undefined>) {
 }
 
 export default function TradingLanding() {
+  const [mssResult,setMssResult]=useState<MssResult|null>(null);
+  const [mssFocus,setMssFocus]=useState<MssFocus|null>(null);
   const [isAuthed, setIsAuthed] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [activeTab, setActiveTab] = useState<Tab>("realtime-orders");
+  // deep link: /?tab=<tab id>&... (e.g. Reversal -> Market Structure Shift links)
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("tab");
+    if (t && tabs.some((x) => x.id === t)) setActiveTab(t as Tab); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
   const [selectedTrade, setSelectedTrade] = useState<TradePrefill | null>(null);
   const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
 
@@ -120,15 +166,7 @@ export default function TradingLanding() {
                 );
               })}
             </nav>
-            <div className="mt-8 rounded-md border border-white/10 bg-white/[0.03] p-3">
-              <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-white">
-                <Bot className="size-4 text-[#64d2ff]" />
-                LLM assistant
-              </div>
-              <p className="text-xs leading-5 text-[#93a1b6]">
-                Strategy notes, anomaly checks, and execution summaries will attach here.
-              </p>
-            </div>
+            <AssistantPanel currentTab={activeTab} />
           </aside>
 
           <section className="flex min-w-0 flex-1 flex-col">
@@ -150,7 +188,7 @@ export default function TradingLanding() {
               </button>
             </header>
 
-            <div className="flex flex-wrap gap-2 border-b border-white/10 bg-[#0d1118] px-4 py-3 md:hidden">
+            <div className="flex flex-wrap gap-2 border-b border-white/10 bg-[#0d1118] px-4 py-3 lg:hidden">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -173,10 +211,25 @@ export default function TradingLanding() {
 
             <div className="flex-1 overflow-auto p-4 md:p-6">
               {activeTab === "realtime-orders" ? <RealtimeOrdersDashboard onOpenTrade={openTrade} /> : null}
+              {activeTab === "account-management" && !HIDE_ACCOUNT_MGMT ? <AccountManagement onOpenTrade={openTrade} /> : null}
               {activeTab === "strategy-builder" ? <SictStrategyBuilder onOpenBacktest={() => setActiveTab("backtest")} /> : null}
+              {activeTab === "options-lab" ? <OptionsLab /> : null}
               {activeTab === "tradezella" ? <StrategyWorkspace mode="tradezella" initialSelection={selectedTrade} /> : null}
               {activeTab === "stonk" ? <StrategyWorkspace mode="stonk" initialSelection={selectedTrade} /> : null}
+              {activeTab === "daily-bias" ? <DailyBiasDashboard /> : null}
+              {activeTab === "market-structure-shift" ? <MarketStructureShift initialData={mssResult} initialFocus={mssFocus} onResult={result=>{setMssResult(result);setMssFocus(null);}} /> : null}
+              {activeTab === "fib-calculation" ? <FibCalculation /> : null}
+              {activeTab === "scalping-labs" ? <ScalpingLabs /> : null}
+              {activeTab === "smt-divergence" ? <SmtDivergence /> : null}
+              {activeTab === "top-down" ? <TopDownAnalysis key="top-down" /> : null}
+              {activeTab === "swing-trading" ? <TopDownAnalysis key="swing-trading" mode="swing" /> : null}
+              {activeTab === "ict-core" ? <IctCoreWorkspace onOpenModule={setActiveTab} /> : null}
               {activeTab === "backtest" ? <BacktestDashboard /> : null}
+              {activeTab === "reversals-updated" ? <ReversalsUpdated /> : null}
+              {activeTab === "consolidation" ? <ConsolidationDashboard /> : null}
+              {activeTab === "expansion" ? <ExpansionDashboard /> : null}
+              {activeTab === "amd" ? <AmdDashboard /> : null}
+              {activeTab === "reversal" ? <ReversalDashboard mssResult={mssResult} onOpenTrade={openTrade} onInspect={focus=>{setMssFocus(focus);setActiveTab("market-structure-shift");}} onOpenMss={()=>setActiveTab("market-structure-shift")} /> : null}
               {activeTab === "ml" ? <MlInsights /> : null}
               {activeTab === "blogs" ? <Blogs selectedId={selectedBlogId} onSelect={setSelectedBlogId} /> : null}
               {activeTab === "monitoring" ? <MonitoringPanel /> : null}

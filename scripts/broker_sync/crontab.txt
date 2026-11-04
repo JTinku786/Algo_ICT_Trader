@@ -1,0 +1,16 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Titania broker-truth sync — crontab entries (America/New_York, matching the
+# existing ICT India schedule).
+#
+# IST = ET + 9:30 (EDT) / +10:30 (EST).
+#
+#   16:15 IST  ->  06:45 ET   main pull, after the India close and well before
+#                             the brokers roll their day-scoped books over
+#   21:00 IST  ->  11:30 ET   late pass: Dhan posts the ledger and settlement
+#                             charges hours after the close
+# ═══════════════════════════════════════════════════════════════════════════
+
+BROKER_SYNC=/mnt/c/Users/saite/OneDrive/Documents/Algo_ICT_Trader/scripts/broker_sync
+
+45 6 * * 1-5  /bin/bash $BROKER_SYNC/run_daily_sync.sh
+30 11 * * 1-5 /bin/bash $BROKER_SYNC/run_daily_sync.sh --datasets ledger trades funds

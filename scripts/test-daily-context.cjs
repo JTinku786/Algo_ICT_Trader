@@ -1,0 +1,32 @@
+const fs=require('node:fs'),ts=require('typescript'),Module=require('node:module'),assert=require('node:assert/strict');
+function load(path,deps={}){const m=new Module(path);const native=m.require.bind(m);m.require=id=>deps[id]||native(id);m._compile(ts.transpileModule(fs.readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,path+'.cjs');return m.exports;}
+const weekly=load('src/lib/weekly-replay.ts',{'./liquidity-sweeps':load('src/lib/liquidity-sweeps.ts')});
+const {dailyContext}=load('src/lib/daily-context.ts',{'./weekly-replay':weekly});
+const {replayFibonacci}=load('src/lib/replay-fibonacci.ts',{'./weekly-replay':weekly});
+function b(i,o,h,l,c){const t=Date.UTC(2026,0,1+i);return {day:new Date(t).toISOString().slice(0,10),t,knownAt:t+21*3600000,minute:0,o,h,l,c};}
+const base=Array.from({length:16},(_,i)=>b(i,100,101,99,100));
+const data=bars=>({daily:bars,bars,frame:'1d',instrument:{name:'AAPL',market:'us',zone:'America/New_York'},invalidDailyDays:[]});
+assert.equal(dailyContext(data(base),base.at(-1).day).primary,'Consolidation');
+assert.equal(dailyContext(data(base.slice(0,5)),base[4].day).primary,'Insufficient valid context');
+const up=[...base,b(16,100,102,99,101),b(17,101,103,100,102),b(18,102,104,101,103)];
+const expansion=[...up,b(19,103,108,102,107)];assert.equal(dailyContext(data(expansion),expansion.at(-1).day).primary,'Expansion');
+const retrace=[...up,b(19,103,103.5,101.5,102.5)];assert.equal(dailyContext(data(retrace),retrace.at(-1).day).primary,'Retracement');
+const reversal=[...up,b(19,104,105,98,99)];assert.equal(dailyContext(data(reversal),reversal.at(-1).day).primary,'Reversal');
+const snapshot=dailyContext(data(expansion),expansion.at(-1).day);
+const future=[...expansion,b(20,1,9999,.01,999)];assert.deepEqual(dailyContext(data(future),expansion.at(-1).day),snapshot);
+for(const p of [...snapshot.orderblocks,...snapshot.gaps,...snapshot.voids,...snapshot.pools,...snapshot.equilibrium])assert.ok(p.timing==='Before day'?p.knownAt<snapshot.knownAt:p.knownAt===snapshot.knownAt);
+const equality=[...up,b(19,103,104,102,103)];assert.match(dailyContext(data(equality),equality.at(-1).day).pools.find(p=>p.kind.includes('previous day')&&p.kind.includes('high')).response,/Equal-price touch/);
+const invalid={...data(expansion),invalidDailyDays:[base[5].day]};assert.equal(dailyContext(invalid,expansion.at(-1).day).ready,false);
+const leg=[...base,b(16,100,102,98,101),b(17,101,103,100,102)];const f1=replayFibonacci(leg,'1d');assert.ok(f1&&f1.upward);assert.equal(f1.low,98);assert.equal(f1.high,103);assert.equal(f1.levels.find(l=>l.ratio===1).price,98);
+const f2=replayFibonacci([...leg,b(18,102,105,101,104)],'1d');assert.equal(f2.low,98);assert.equal(f2.high,105);assert.equal(f2.levels.find(l=>l.ratio===.5).price,101.5);assert.equal(replayFibonacci(base,'1d'),null);
+assert.deepEqual(replayFibonacci([...leg,b(18,102,999,101,104)].slice(0,leg.length),'1d'),f1);
+const impulse=[...base,b(16,100,106.2,99.8,106)];
+const voidOrigin=impulse.at(-1).day;
+assert.ok(dailyContext(data(impulse),voidOrigin).voids.some(v=>v.originDay===voidOrigin&&v.timing==='Confirmed at close'));
+const partial=[...impulse,b(17,106,107,103,104)];
+assert.match(dailyContext(data(partial),partial.at(-1).day).voids.find(v=>v.originDay===voidOrigin).response,/Partial overlap/);
+const filled=[...partial,b(18,104,104.5,99.5,100)];
+assert.match(dailyContext(data(filled),filled.at(-1).day).voids.find(v=>v.originDay===voidOrigin).response,/filled in/);
+const retired=[...filled,b(19,100,101,99,100)];
+assert.ok(!dailyContext(data(retired),retired.at(-1).day).voids.some(v=>v.originDay===voidOrigin));
+console.log('PASS: four context states, insufficient/invalid context, strict touches, event confirmation timing, future invariance, dynamic Fibonacci levels, rewind and no fabricated anchors.');

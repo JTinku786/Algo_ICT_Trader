@@ -1,0 +1,2078 @@
+{
+  "schemaVersion": "ict-course-coverage-v1",
+  "reviewDate": "2026-10-02",
+  "pageCount": 1246,
+  "ocrPageCount": 1246,
+  "method": "All-page native extraction and OCR; topic indexing and selected critical visual checks. OCR search is not semantic strategy certification.",
+  "sources": [
+    {
+      "month": "Month 01",
+      "fileName": "Month01-September_ICT_Notes.pdf",
+      "pageCount": 32
+    },
+    {
+      "month": "Month 02",
+      "fileName": "Month02-October_Notes.pdf",
+      "pageCount": 121
+    },
+    {
+      "month": "Month 03",
+      "fileName": "Month03-november_notes.pdf",
+      "pageCount": 71
+    },
+    {
+      "month": "Month 04",
+      "fileName": "Month04-december_study_notes.pdf",
+      "pageCount": 105
+    },
+    {
+      "month": "Month 05",
+      "fileName": "Month05-January_2017_Study_Notes.pdf",
+      "pageCount": 147
+    },
+    {
+      "month": "Month 06",
+      "fileName": "Month06-feb_studynotes.pdf",
+      "pageCount": 92
+    },
+    {
+      "month": "Month 07",
+      "fileName": "Month07-march_studynotes.pdf",
+      "pageCount": 133
+    },
+    {
+      "month": "Month 08",
+      "fileName": "Month08-april_study_notes.pdf",
+      "pageCount": 85
+    },
+    {
+      "month": "Month 09",
+      "fileName": "Month09-may_studynotes.pdf",
+      "pageCount": 106
+    },
+    {
+      "month": "Month 10",
+      "fileName": "Month10-june_2017_study_notes.pdf",
+      "pageCount": 201
+    },
+    {
+      "month": "Month 11",
+      "fileName": "Month11-july_2017_study_notes.pdf",
+      "pageCount": 52
+    },
+    {
+      "month": "Month 12",
+      "fileName": "Month12 - 1 August.pdf",
+      "pageCount": 101
+    }
+  ],
+  "topicIndex": {
+    "deliveryStates": [
+      {
+        "month": "Month 01",
+        "page": 3
+      },
+      {
+        "month": "Month 01",
+        "page": 4
+      },
+      {
+        "month": "Month 01",
+        "page": 6
+      },
+      {
+        "month": "Month 01",
+        "page": 8
+      },
+      {
+        "month": "Month 01",
+        "page": 9
+      },
+      {
+        "month": "Month 01",
+        "page": 10
+      },
+      {
+        "month": "Month 01",
+        "page": 11
+      },
+      {
+        "month": "Month 01",
+        "page": 12
+      },
+      {
+        "month": "Month 01",
+        "page": 13
+      },
+      {
+        "month": "Month 01",
+        "page": 14
+      },
+      {
+        "month": "Month 01",
+        "page": 15
+      },
+      {
+        "month": "Month 01",
+        "page": 16
+      },
+      {
+        "month": "Month 01",
+        "page": 31
+      },
+      {
+        "month": "Month 02",
+        "page": 87
+      },
+      {
+        "month": "Month 02",
+        "page": 96
+      },
+      {
+        "month": "Month 03",
+        "page": 3
+      },
+      {
+        "month": "Month 03",
+        "page": 33
+      },
+      {
+        "month": "Month 03",
+        "page": 56
+      },
+      {
+        "month": "Month 03",
+        "page": 57
+      },
+      {
+        "month": "Month 03",
+        "page": 58
+      },
+      {
+        "month": "Month 03",
+        "page": 59
+      },
+      {
+        "month": "Month 04",
+        "page": 54
+      },
+      {
+        "month": "Month 04",
+        "page": 56
+      },
+      {
+        "month": "Month 05",
+        "page": 45
+      },
+      {
+        "month": "Month 05",
+        "page": 48
+      },
+      {
+        "month": "Month 06",
+        "page": 6
+      },
+      {
+        "month": "Month 06",
+        "page": 7
+      },
+      {
+        "month": "Month 06",
+        "page": 8
+      },
+      {
+        "month": "Month 06",
+        "page": 27
+      },
+      {
+        "month": "Month 06",
+        "page": 30
+      },
+      {
+        "month": "Month 06",
+        "page": 31
+      },
+      {
+        "month": "Month 06",
+        "page": 33
+      },
+      {
+        "month": "Month 07",
+        "page": 27
+      },
+      {
+        "month": "Month 07",
+        "page": 28
+      },
+      {
+        "month": "Month 07",
+        "page": 29
+      },
+      {
+        "month": "Month 07",
+        "page": 30
+      },
+      {
+        "month": "Month 07",
+        "page": 33
+      },
+      {
+        "month": "Month 07",
+        "page": 34
+      },
+      {
+        "month": "Month 07",
+        "page": 47
+      },
+      {
+        "month": "Month 07",
+        "page": 48
+      },
+      {
+        "month": "Month 07",
+        "page": 49
+      },
+      {
+        "month": "Month 07",
+        "page": 50
+      },
+      {
+        "month": "Month 07",
+        "page": 51
+      },
+      {
+        "month": "Month 07",
+        "page": 52
+      },
+      {
+        "month": "Month 07",
+        "page": 53
+      },
+      {
+        "month": "Month 07",
+        "page": 54
+      },
+      {
+        "month": "Month 07",
+        "page": 55
+      },
+      {
+        "month": "Month 07",
+        "page": 56
+      },
+      {
+        "month": "Month 07",
+        "page": 67
+      },
+      {
+        "month": "Month 07",
+        "page": 68
+      },
+      {
+        "month": "Month 07",
+        "page": 69
+      },
+      {
+        "month": "Month 07",
+        "page": 70
+      },
+      {
+        "month": "Month 07",
+        "page": 71
+      },
+      {
+        "month": "Month 07",
+        "page": 72
+      },
+      {
+        "month": "Month 07",
+        "page": 73
+      },
+      {
+        "month": "Month 07",
+        "page": 74
+      },
+      {
+        "month": "Month 07",
+        "page": 75
+      },
+      {
+        "month": "Month 07",
+        "page": 76
+      },
+      {
+        "month": "Month 07",
+        "page": 77
+      },
+      {
+        "month": "Month 07",
+        "page": 78
+      },
+      {
+        "month": "Month 07",
+        "page": 79
+      },
+      {
+        "month": "Month 07",
+        "page": 80
+      },
+      {
+        "month": "Month 07",
+        "page": 81
+      },
+      {
+        "month": "Month 07",
+        "page": 82
+      },
+      {
+        "month": "Month 07",
+        "page": 83
+      },
+      {
+        "month": "Month 07",
+        "page": 84
+      },
+      {
+        "month": "Month 07",
+        "page": 85
+      },
+      {
+        "month": "Month 07",
+        "page": 86
+      },
+      {
+        "month": "Month 07",
+        "page": 100
+      },
+      {
+        "month": "Month 07",
+        "page": 101
+      },
+      {
+        "month": "Month 07",
+        "page": 102
+      },
+      {
+        "month": "Month 07",
+        "page": 103
+      },
+      {
+        "month": "Month 07",
+        "page": 104
+      },
+      {
+        "month": "Month 07",
+        "page": 105
+      },
+      {
+        "month": "Month 07",
+        "page": 106
+      },
+      {
+        "month": "Month 07",
+        "page": 107
+      },
+      {
+        "month": "Month 07",
+        "page": 108
+      },
+      {
+        "month": "Month 07",
+        "page": 109
+      },
+      {
+        "month": "Month 07",
+        "page": 110
+      },
+      {
+        "month": "Month 07",
+        "page": 111
+      },
+      {
+        "month": "Month 07",
+        "page": 112
+      },
+      {
+        "month": "Month 07",
+        "page": 113
+      },
+      {
+        "month": "Month 07",
+        "page": 114
+      },
+      {
+        "month": "Month 07",
+        "page": 115
+      },
+      {
+        "month": "Month 07",
+        "page": 116
+      },
+      {
+        "month": "Month 07",
+        "page": 117
+      },
+      {
+        "month": "Month 07",
+        "page": 118
+      },
+      {
+        "month": "Month 07",
+        "page": 119
+      },
+      {
+        "month": "Month 07",
+        "page": 120
+      },
+      {
+        "month": "Month 08",
+        "page": 4
+      },
+      {
+        "month": "Month 08",
+        "page": 10
+      },
+      {
+        "month": "Month 08",
+        "page": 55
+      },
+      {
+        "month": "Month 08",
+        "page": 56
+      },
+      {
+        "month": "Month 08",
+        "page": 59
+      },
+      {
+        "month": "Month 08",
+        "page": 60
+      },
+      {
+        "month": "Month 08",
+        "page": 63
+      },
+      {
+        "month": "Month 08",
+        "page": 64
+      },
+      {
+        "month": "Month 08",
+        "page": 65
+      },
+      {
+        "month": "Month 08",
+        "page": 66
+      },
+      {
+        "month": "Month 08",
+        "page": 69
+      },
+      {
+        "month": "Month 08",
+        "page": 73
+      },
+      {
+        "month": "Month 09",
+        "page": 22
+      },
+      {
+        "month": "Month 09",
+        "page": 29
+      },
+      {
+        "month": "Month 09",
+        "page": 34
+      },
+      {
+        "month": "Month 09",
+        "page": 35
+      },
+      {
+        "month": "Month 09",
+        "page": 36
+      },
+      {
+        "month": "Month 09",
+        "page": 37
+      },
+      {
+        "month": "Month 09",
+        "page": 38
+      },
+      {
+        "month": "Month 09",
+        "page": 39
+      },
+      {
+        "month": "Month 09",
+        "page": 40
+      },
+      {
+        "month": "Month 09",
+        "page": 41
+      },
+      {
+        "month": "Month 09",
+        "page": 42
+      },
+      {
+        "month": "Month 09",
+        "page": 43
+      },
+      {
+        "month": "Month 09",
+        "page": 44
+      },
+      {
+        "month": "Month 09",
+        "page": 45
+      },
+      {
+        "month": "Month 09",
+        "page": 46
+      },
+      {
+        "month": "Month 09",
+        "page": 47
+      },
+      {
+        "month": "Month 09",
+        "page": 48
+      },
+      {
+        "month": "Month 09",
+        "page": 49
+      },
+      {
+        "month": "Month 09",
+        "page": 50
+      },
+      {
+        "month": "Month 09",
+        "page": 51
+      },
+      {
+        "month": "Month 09",
+        "page": 52
+      },
+      {
+        "month": "Month 09",
+        "page": 53
+      },
+      {
+        "month": "Month 09",
+        "page": 54
+      },
+      {
+        "month": "Month 09",
+        "page": 55
+      },
+      {
+        "month": "Month 09",
+        "page": 56
+      },
+      {
+        "month": "Month 09",
+        "page": 57
+      },
+      {
+        "month": "Month 09",
+        "page": 58
+      },
+      {
+        "month": "Month 09",
+        "page": 60
+      },
+      {
+        "month": "Month 09",
+        "page": 69
+      },
+      {
+        "month": "Month 09",
+        "page": 70
+      },
+      {
+        "month": "Month 09",
+        "page": 71
+      },
+      {
+        "month": "Month 09",
+        "page": 72
+      },
+      {
+        "month": "Month 09",
+        "page": 73
+      },
+      {
+        "month": "Month 09",
+        "page": 74
+      },
+      {
+        "month": "Month 09",
+        "page": 75
+      },
+      {
+        "month": "Month 09",
+        "page": 76
+      },
+      {
+        "month": "Month 09",
+        "page": 77
+      },
+      {
+        "month": "Month 09",
+        "page": 79
+      },
+      {
+        "month": "Month 09",
+        "page": 88
+      },
+      {
+        "month": "Month 09",
+        "page": 89
+      },
+      {
+        "month": "Month 09",
+        "page": 90
+      },
+      {
+        "month": "Month 09",
+        "page": 91
+      },
+      {
+        "month": "Month 09",
+        "page": 92
+      },
+      {
+        "month": "Month 09",
+        "page": 93
+      },
+      {
+        "month": "Month 09",
+        "page": 94
+      },
+      {
+        "month": "Month 09",
+        "page": 95
+      },
+      {
+        "month": "Month 10",
+        "page": 76
+      },
+      {
+        "month": "Month 10",
+        "page": 77
+      },
+      {
+        "month": "Month 10",
+        "page": 91
+      },
+      {
+        "month": "Month 10",
+        "page": 92
+      },
+      {
+        "month": "Month 10",
+        "page": 93
+      },
+      {
+        "month": "Month 10",
+        "page": 94
+      },
+      {
+        "month": "Month 10",
+        "page": 95
+      },
+      {
+        "month": "Month 10",
+        "page": 96
+      },
+      {
+        "month": "Month 10",
+        "page": 97
+      },
+      {
+        "month": "Month 10",
+        "page": 127
+      },
+      {
+        "month": "Month 10",
+        "page": 128
+      },
+      {
+        "month": "Month 10",
+        "page": 129
+      },
+      {
+        "month": "Month 10",
+        "page": 130
+      },
+      {
+        "month": "Month 10",
+        "page": 131
+      },
+      {
+        "month": "Month 10",
+        "page": 132
+      },
+      {
+        "month": "Month 10",
+        "page": 134
+      },
+      {
+        "month": "Month 10",
+        "page": 135
+      },
+      {
+        "month": "Month 10",
+        "page": 136
+      },
+      {
+        "month": "Month 10",
+        "page": 137
+      },
+      {
+        "month": "Month 10",
+        "page": 138
+      },
+      {
+        "month": "Month 10",
+        "page": 139
+      },
+      {
+        "month": "Month 10",
+        "page": 141
+      },
+      {
+        "month": "Month 10",
+        "page": 142
+      },
+      {
+        "month": "Month 10",
+        "page": 143
+      },
+      {
+        "month": "Month 10",
+        "page": 144
+      },
+      {
+        "month": "Month 10",
+        "page": 145
+      },
+      {
+        "month": "Month 10",
+        "page": 146
+      },
+      {
+        "month": "Month 10",
+        "page": 147
+      },
+      {
+        "month": "Month 10",
+        "page": 148
+      },
+      {
+        "month": "Month 10",
+        "page": 149
+      },
+      {
+        "month": "Month 10",
+        "page": 150
+      },
+      {
+        "month": "Month 10",
+        "page": 151
+      },
+      {
+        "month": "Month 10",
+        "page": 152
+      },
+      {
+        "month": "Month 10",
+        "page": 153
+      },
+      {
+        "month": "Month 10",
+        "page": 155
+      },
+      {
+        "month": "Month 10",
+        "page": 161
+      },
+      {
+        "month": "Month 10",
+        "page": 177
+      },
+      {
+        "month": "Month 10",
+        "page": 195
+      },
+      {
+        "month": "Month 10",
+        "page": 196
+      },
+      {
+        "month": "Month 12",
+        "page": 13
+      },
+      {
+        "month": "Month 12",
+        "page": 17
+      },
+      {
+        "month": "Month 12",
+        "page": 33
+      },
+      {
+        "month": "Month 12",
+        "page": 87
+      },
+      {
+        "month": "Month 12",
+        "page": 88
+      },
+      {
+        "month": "Month 12",
+        "page": 89
+      },
+      {
+        "month": "Month 12",
+        "page": 95
+      },
+      {
+        "month": "Month 12",
+        "page": 96
+      },
+      {
+        "month": "Month 12",
+        "page": 97
+      },
+      {
+        "month": "Month 12",
+        "page": 98
+      },
+      {
+        "month": "Month 12",
+        "page": 99
+      },
+      {
+        "month": "Month 12",
+        "page": 100
+      }
+    ],
+    "weeklyProfiles": [
+      {
+        "month": "Month 06",
+        "page": 7
+      },
+      {
+        "month": "Month 06",
+        "page": 28
+      },
+      {
+        "month": "Month 06",
+        "page": 32
+      },
+      {
+        "month": "Month 07",
+        "page": 23
+      },
+      {
+        "month": "Month 07",
+        "page": 24
+      },
+      {
+        "month": "Month 07",
+        "page": 25
+      },
+      {
+        "month": "Month 07",
+        "page": 26
+      },
+      {
+        "month": "Month 07",
+        "page": 27
+      },
+      {
+        "month": "Month 07",
+        "page": 28
+      },
+      {
+        "month": "Month 07",
+        "page": 29
+      },
+      {
+        "month": "Month 07",
+        "page": 30
+      },
+      {
+        "month": "Month 07",
+        "page": 31
+      },
+      {
+        "month": "Month 07",
+        "page": 32
+      },
+      {
+        "month": "Month 07",
+        "page": 33
+      },
+      {
+        "month": "Month 07",
+        "page": 34
+      },
+      {
+        "month": "Month 07",
+        "page": 108
+      },
+      {
+        "month": "Month 07",
+        "page": 122
+      },
+      {
+        "month": "Month 07",
+        "page": 131
+      },
+      {
+        "month": "Month 12",
+        "page": 51
+      },
+      {
+        "month": "Month 12",
+        "page": 56
+      },
+      {
+        "month": "Month 12",
+        "page": 85
+      },
+      {
+        "month": "Month 12",
+        "page": 86
+      },
+      {
+        "month": "Month 12",
+        "page": 87
+      },
+      {
+        "month": "Month 12",
+        "page": 88
+      },
+      {
+        "month": "Month 12",
+        "page": 89
+      },
+      {
+        "month": "Month 12",
+        "page": 93
+      },
+      {
+        "month": "Month 12",
+        "page": 94
+      },
+      {
+        "month": "Month 12",
+        "page": 95
+      },
+      {
+        "month": "Month 12",
+        "page": 96
+      }
+    ],
+    "rangeLiquidity": [
+      {
+        "month": "Month 04",
+        "page": 19
+      },
+      {
+        "month": "Month 04",
+        "page": 24
+      },
+      {
+        "month": "Month 12",
+        "page": 82
+      },
+      {
+        "month": "Month 12",
+        "page": 90
+      },
+      {
+        "month": "Month 12",
+        "page": 97
+      },
+      {
+        "month": "Month 12",
+        "page": 98
+      },
+      {
+        "month": "Month 12",
+        "page": 99
+      },
+      {
+        "month": "Month 12",
+        "page": 100
+      }
+    ],
+    "vacuumBlocks": [
+      {
+        "month": "Month 04",
+        "page": 71
+      },
+      {
+        "month": "Month 04",
+        "page": 72
+      },
+      {
+        "month": "Month 04",
+        "page": 73
+      },
+      {
+        "month": "Month 04",
+        "page": 74
+      },
+      {
+        "month": "Month 04",
+        "page": 75
+      },
+      {
+        "month": "Month 04",
+        "page": 86
+      },
+      {
+        "month": "Month 04",
+        "page": 87
+      },
+      {
+        "month": "Month 04",
+        "page": 88
+      },
+      {
+        "month": "Month 04",
+        "page": 89
+      },
+      {
+        "month": "Month 04",
+        "page": 90
+      }
+    ],
+    "mitigationBlocks": [
+      {
+        "month": "Month 04",
+        "page": 30
+      },
+      {
+        "month": "Month 05",
+        "page": 41
+      },
+      {
+        "month": "Month 05",
+        "page": 116
+      },
+      {
+        "month": "Month 05",
+        "page": 117
+      },
+      {
+        "month": "Month 05",
+        "page": 118
+      },
+      {
+        "month": "Month 05",
+        "page": 119
+      },
+      {
+        "month": "Month 05",
+        "page": 121
+      },
+      {
+        "month": "Month 05",
+        "page": 122
+      },
+      {
+        "month": "Month 05",
+        "page": 123
+      },
+      {
+        "month": "Month 05",
+        "page": 124
+      },
+      {
+        "month": "Month 05",
+        "page": 125
+      },
+      {
+        "month": "Month 05",
+        "page": 126
+      },
+      {
+        "month": "Month 05",
+        "page": 127
+      },
+      {
+        "month": "Month 06",
+        "page": 25
+      },
+      {
+        "month": "Month 06",
+        "page": 35
+      },
+      {
+        "month": "Month 06",
+        "page": 41
+      },
+      {
+        "month": "Month 06",
+        "page": 69
+      },
+      {
+        "month": "Month 06",
+        "page": 70
+      },
+      {
+        "month": "Month 07",
+        "page": 4
+      },
+      {
+        "month": "Month 07",
+        "page": 5
+      },
+      {
+        "month": "Month 07",
+        "page": 57
+      },
+      {
+        "month": "Month 07",
+        "page": 62
+      },
+      {
+        "month": "Month 07",
+        "page": 67
+      },
+      {
+        "month": "Month 07",
+        "page": 87
+      },
+      {
+        "month": "Month 07",
+        "page": 100
+      }
+    ],
+    "SMT": [
+      {
+        "month": "Month 02",
+        "page": 86
+      },
+      {
+        "month": "Month 03",
+        "page": 56
+      },
+      {
+        "month": "Month 03",
+        "page": 57
+      },
+      {
+        "month": "Month 03",
+        "page": 58
+      },
+      {
+        "month": "Month 03",
+        "page": 59
+      },
+      {
+        "month": "Month 03",
+        "page": 60
+      },
+      {
+        "month": "Month 03",
+        "page": 61
+      },
+      {
+        "month": "Month 03",
+        "page": 62
+      },
+      {
+        "month": "Month 03",
+        "page": 63
+      },
+      {
+        "month": "Month 06",
+        "page": 69
+      },
+      {
+        "month": "Month 06",
+        "page": 70
+      },
+      {
+        "month": "Month 10",
+        "page": 133
+      },
+      {
+        "month": "Month 10",
+        "page": 140
+      },
+      {
+        "month": "Month 10",
+        "page": 147
+      },
+      {
+        "month": "Month 10",
+        "page": 148
+      },
+      {
+        "month": "Month 10",
+        "page": 149
+      },
+      {
+        "month": "Month 10",
+        "page": 150
+      },
+      {
+        "month": "Month 10",
+        "page": 151
+      },
+      {
+        "month": "Month 10",
+        "page": 152
+      },
+      {
+        "month": "Month 11",
+        "page": 50
+      },
+      {
+        "month": "Month 11",
+        "page": 51
+      },
+      {
+        "month": "Month 12",
+        "page": 52
+      },
+      {
+        "month": "Month 12",
+        "page": 56
+      },
+      {
+        "month": "Month 12",
+        "page": 85
+      },
+      {
+        "month": "Month 12",
+        "page": 93
+      }
+    ],
+    "IPDA": [
+      {
+        "month": "Month 01",
+        "page": 7
+      },
+      {
+        "month": "Month 02",
+        "page": 80
+      },
+      {
+        "month": "Month 02",
+        "page": 81
+      },
+      {
+        "month": "Month 02",
+        "page": 83
+      },
+      {
+        "month": "Month 02",
+        "page": 85
+      },
+      {
+        "month": "Month 02",
+        "page": 86
+      },
+      {
+        "month": "Month 05",
+        "page": 3
+      },
+      {
+        "month": "Month 05",
+        "page": 4
+      },
+      {
+        "month": "Month 05",
+        "page": 30
+      },
+      {
+        "month": "Month 05",
+        "page": 31
+      },
+      {
+        "month": "Month 05",
+        "page": 32
+      },
+      {
+        "month": "Month 05",
+        "page": 33
+      },
+      {
+        "month": "Month 05",
+        "page": 34
+      },
+      {
+        "month": "Month 05",
+        "page": 35
+      },
+      {
+        "month": "Month 05",
+        "page": 36
+      },
+      {
+        "month": "Month 05",
+        "page": 37
+      },
+      {
+        "month": "Month 05",
+        "page": 38
+      },
+      {
+        "month": "Month 05",
+        "page": 39
+      },
+      {
+        "month": "Month 05",
+        "page": 40
+      },
+      {
+        "month": "Month 05",
+        "page": 41
+      },
+      {
+        "month": "Month 05",
+        "page": 42
+      },
+      {
+        "month": "Month 06",
+        "page": 68
+      },
+      {
+        "month": "Month 07",
+        "page": 57
+      },
+      {
+        "month": "Month 07",
+        "page": 58
+      },
+      {
+        "month": "Month 07",
+        "page": 59
+      },
+      {
+        "month": "Month 07",
+        "page": 61
+      },
+      {
+        "month": "Month 07",
+        "page": 63
+      },
+      {
+        "month": "Month 07",
+        "page": 64
+      },
+      {
+        "month": "Month 07",
+        "page": 65
+      },
+      {
+        "month": "Month 07",
+        "page": 67
+      },
+      {
+        "month": "Month 07",
+        "page": 87
+      },
+      {
+        "month": "Month 07",
+        "page": 100
+      },
+      {
+        "month": "Month 07",
+        "page": 122
+      },
+      {
+        "month": "Month 08",
+        "page": 4
+      },
+      {
+        "month": "Month 08",
+        "page": 24
+      },
+      {
+        "month": "Month 08",
+        "page": 25
+      },
+      {
+        "month": "Month 08",
+        "page": 27
+      },
+      {
+        "month": "Month 08",
+        "page": 28
+      },
+      {
+        "month": "Month 08",
+        "page": 29
+      },
+      {
+        "month": "Month 08",
+        "page": 55
+      },
+      {
+        "month": "Month 08",
+        "page": 56
+      },
+      {
+        "month": "Month 08",
+        "page": 59
+      },
+      {
+        "month": "Month 08",
+        "page": 60
+      },
+      {
+        "month": "Month 08",
+        "page": 77
+      },
+      {
+        "month": "Month 08",
+        "page": 78
+      },
+      {
+        "month": "Month 08",
+        "page": 79
+      },
+      {
+        "month": "Month 08",
+        "page": 80
+      },
+      {
+        "month": "Month 08",
+        "page": 81
+      },
+      {
+        "month": "Month 08",
+        "page": 82
+      },
+      {
+        "month": "Month 08",
+        "page": 83
+      },
+      {
+        "month": "Month 08",
+        "page": 84
+      },
+      {
+        "month": "Month 08",
+        "page": 85
+      },
+      {
+        "month": "Month 09",
+        "page": 13
+      },
+      {
+        "month": "Month 09",
+        "page": 14
+      },
+      {
+        "month": "Month 09",
+        "page": 15
+      },
+      {
+        "month": "Month 09",
+        "page": 16
+      },
+      {
+        "month": "Month 09",
+        "page": 17
+      },
+      {
+        "month": "Month 09",
+        "page": 18
+      },
+      {
+        "month": "Month 09",
+        "page": 19
+      },
+      {
+        "month": "Month 09",
+        "page": 20
+      },
+      {
+        "month": "Month 09",
+        "page": 55
+      },
+      {
+        "month": "Month 09",
+        "page": 79
+      },
+      {
+        "month": "Month 12",
+        "page": 58
+      },
+      {
+        "month": "Month 12",
+        "page": 59
+      },
+      {
+        "month": "Month 12",
+        "page": 60
+      },
+      {
+        "month": "Month 12",
+        "page": 61
+      },
+      {
+        "month": "Month 12",
+        "page": 62
+      },
+      {
+        "month": "Month 12",
+        "page": 63
+      },
+      {
+        "month": "Month 12",
+        "page": 64
+      },
+      {
+        "month": "Month 12",
+        "page": 65
+      },
+      {
+        "month": "Month 12",
+        "page": 67
+      }
+    ],
+    "CBDR": [
+      {
+        "month": "Month 08",
+        "page": 33
+      },
+      {
+        "month": "Month 08",
+        "page": 34
+      },
+      {
+        "month": "Month 08",
+        "page": 35
+      },
+      {
+        "month": "Month 08",
+        "page": 36
+      },
+      {
+        "month": "Month 08",
+        "page": 37
+      },
+      {
+        "month": "Month 08",
+        "page": 38
+      },
+      {
+        "month": "Month 08",
+        "page": 39
+      },
+      {
+        "month": "Month 08",
+        "page": 40
+      },
+      {
+        "month": "Month 08",
+        "page": 41
+      },
+      {
+        "month": "Month 08",
+        "page": 42
+      },
+      {
+        "month": "Month 08",
+        "page": 43
+      },
+      {
+        "month": "Month 08",
+        "page": 48
+      },
+      {
+        "month": "Month 08",
+        "page": 49
+      },
+      {
+        "month": "Month 08",
+        "page": 53
+      },
+      {
+        "month": "Month 08",
+        "page": 54
+      },
+      {
+        "month": "Month 08",
+        "page": 55
+      },
+      {
+        "month": "Month 08",
+        "page": 56
+      },
+      {
+        "month": "Month 08",
+        "page": 57
+      },
+      {
+        "month": "Month 08",
+        "page": 58
+      },
+      {
+        "month": "Month 08",
+        "page": 59
+      },
+      {
+        "month": "Month 08",
+        "page": 60
+      },
+      {
+        "month": "Month 08",
+        "page": 62
+      },
+      {
+        "month": "Month 08",
+        "page": 67
+      },
+      {
+        "month": "Month 08",
+        "page": 69
+      },
+      {
+        "month": "Month 08",
+        "page": 70
+      },
+      {
+        "month": "Month 08",
+        "page": 71
+      },
+      {
+        "month": "Month 08",
+        "page": 73
+      },
+      {
+        "month": "Month 08",
+        "page": 74
+      },
+      {
+        "month": "Month 09",
+        "page": 15
+      },
+      {
+        "month": "Month 09",
+        "page": 16
+      },
+      {
+        "month": "Month 12",
+        "page": 60
+      },
+      {
+        "month": "Month 12",
+        "page": 61
+      },
+      {
+        "month": "Month 12",
+        "page": 62
+      },
+      {
+        "month": "Month 12",
+        "page": 63
+      },
+      {
+        "month": "Month 12",
+        "page": 64
+      },
+      {
+        "month": "Month 12",
+        "page": 65
+      },
+      {
+        "month": "Month 12",
+        "page": 69
+      },
+      {
+        "month": "Month 12",
+        "page": 70
+      },
+      {
+        "month": "Month 12",
+        "page": 71
+      },
+      {
+        "month": "Month 12",
+        "page": 85
+      },
+      {
+        "month": "Month 12",
+        "page": 93
+      }
+    ],
+    "asianRange": [
+      {
+        "month": "Month 01",
+        "page": 4
+      },
+      {
+        "month": "Month 08",
+        "page": 20
+      },
+      {
+        "month": "Month 08",
+        "page": 26
+      },
+      {
+        "month": "Month 08",
+        "page": 27
+      },
+      {
+        "month": "Month 08",
+        "page": 28
+      },
+      {
+        "month": "Month 08",
+        "page": 29
+      },
+      {
+        "month": "Month 08",
+        "page": 53
+      },
+      {
+        "month": "Month 08",
+        "page": 54
+      },
+      {
+        "month": "Month 08",
+        "page": 57
+      },
+      {
+        "month": "Month 08",
+        "page": 58
+      },
+      {
+        "month": "Month 08",
+        "page": 62
+      },
+      {
+        "month": "Month 08",
+        "page": 67
+      },
+      {
+        "month": "Month 08",
+        "page": 68
+      },
+      {
+        "month": "Month 08",
+        "page": 69
+      },
+      {
+        "month": "Month 08",
+        "page": 70
+      },
+      {
+        "month": "Month 08",
+        "page": 71
+      },
+      {
+        "month": "Month 08",
+        "page": 72
+      },
+      {
+        "month": "Month 08",
+        "page": 73
+      },
+      {
+        "month": "Month 08",
+        "page": 74
+      },
+      {
+        "month": "Month 09",
+        "page": 3
+      },
+      {
+        "month": "Month 09",
+        "page": 4
+      },
+      {
+        "month": "Month 09",
+        "page": 5
+      },
+      {
+        "month": "Month 09",
+        "page": 6
+      },
+      {
+        "month": "Month 09",
+        "page": 7
+      },
+      {
+        "month": "Month 09",
+        "page": 9
+      },
+      {
+        "month": "Month 09",
+        "page": 10
+      },
+      {
+        "month": "Month 09",
+        "page": 11
+      },
+      {
+        "month": "Month 09",
+        "page": 17
+      },
+      {
+        "month": "Month 09",
+        "page": 21
+      },
+      {
+        "month": "Month 09",
+        "page": 75
+      },
+      {
+        "month": "Month 09",
+        "page": 76
+      },
+      {
+        "month": "Month 09",
+        "page": 94
+      },
+      {
+        "month": "Month 09",
+        "page": 95
+      },
+      {
+        "month": "Month 12",
+        "page": 70
+      },
+      {
+        "month": "Month 12",
+        "page": 71
+      },
+      {
+        "month": "Month 12",
+        "page": 85
+      },
+      {
+        "month": "Month 12",
+        "page": 93
+      }
+    ],
+    "FLOUT": [
+      {
+        "month": "Month 09",
+        "page": 18
+      },
+      {
+        "month": "Month 12",
+        "page": 62
+      },
+      {
+        "month": "Month 12",
+        "page": 63
+      },
+      {
+        "month": "Month 12",
+        "page": 64
+      },
+      {
+        "month": "Month 12",
+        "page": 65
+      },
+      {
+        "month": "Month 12",
+        "page": 71
+      },
+      {
+        "month": "Month 12",
+        "page": 85
+      },
+      {
+        "month": "Month 12",
+        "page": 93
+      }
+    ],
+    "ADR": [
+      {
+        "month": "Month 08",
+        "page": 69
+      },
+      {
+        "month": "Month 08",
+        "page": 70
+      },
+      {
+        "month": "Month 08",
+        "page": 74
+      },
+      {
+        "month": "Month 09",
+        "page": 29
+      },
+      {
+        "month": "Month 09",
+        "page": 67
+      },
+      {
+        "month": "Month 09",
+        "page": 71
+      },
+      {
+        "month": "Month 09",
+        "page": 73
+      },
+      {
+        "month": "Month 09",
+        "page": 74
+      },
+      {
+        "month": "Month 09",
+        "page": 86
+      },
+      {
+        "month": "Month 09",
+        "page": 87
+      },
+      {
+        "month": "Month 09",
+        "page": 90
+      },
+      {
+        "month": "Month 09",
+        "page": 92
+      },
+      {
+        "month": "Month 09",
+        "page": 93
+      },
+      {
+        "month": "Month 09",
+        "page": 96
+      },
+      {
+        "month": "Month 09",
+        "page": 97
+      },
+      {
+        "month": "Month 09",
+        "page": 99
+      },
+      {
+        "month": "Month 09",
+        "page": 100
+      },
+      {
+        "month": "Month 09",
+        "page": 101
+      },
+      {
+        "month": "Month 09",
+        "page": 102
+      },
+      {
+        "month": "Month 09",
+        "page": 103
+      },
+      {
+        "month": "Month 09",
+        "page": 104
+      },
+      {
+        "month": "Month 09",
+        "page": 105
+      },
+      {
+        "month": "Month 12",
+        "page": 65
+      },
+      {
+        "month": "Month 12",
+        "page": 74
+      },
+      {
+        "month": "Month 12",
+        "page": 86
+      },
+      {
+        "month": "Month 12",
+        "page": 87
+      },
+      {
+        "month": "Month 12",
+        "page": 88
+      },
+      {
+        "month": "Month 12",
+        "page": 89
+      },
+      {
+        "month": "Month 12",
+        "page": 94
+      },
+      {
+        "month": "Month 12",
+        "page": 95
+      },
+      {
+        "month": "Month 12",
+        "page": 96
+      }
+    ],
+    "midnightOpen": [
+      {
+        "month": "Month 01",
+        "page": 7
+      },
+      {
+        "month": "Month 08",
+        "page": 20
+      },
+      {
+        "month": "Month 08",
+        "page": 76
+      },
+      {
+        "month": "Month 09",
+        "page": 18
+      },
+      {
+        "month": "Month 09",
+        "page": 25
+      },
+      {
+        "month": "Month 09",
+        "page": 26
+      },
+      {
+        "month": "Month 09",
+        "page": 27
+      },
+      {
+        "month": "Month 09",
+        "page": 28
+      }
+    ],
+    "powerOfThree": [
+      {
+        "month": "Month 07",
+        "page": 121
+      }
+    ],
+    "silverBullet": [],
+    "propulsionBlocks": [],
+    "volumeImbalance": []
+  },
+  "coverageGaps": [
+    "4H Backtest playground",
+    "Certified mitigation/rejection/void/vacuum/propulsion blocks",
+    "Weekly profile and delivery-state classifiers",
+    "PO3 and market maker model classifiers",
+    "Aligned SMT series",
+    "CBDR/Asian/FLOUT and ADR projections",
+    "Macro/COT/open interest/event data"
+  ],
+  "report": "docs/ict-replay-course-review.md"
+}

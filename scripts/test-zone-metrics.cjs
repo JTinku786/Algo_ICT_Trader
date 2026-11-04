@@ -1,0 +1,14 @@
+const fs=require('node:fs'),ts=require('typescript'),Module=require('node:module'),assert=require('node:assert/strict');
+const m=new Module('zone-metrics');m._compile(ts.transpileModule(fs.readFileSync('src/lib/zone-metrics.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,'zone-metrics.cjs');
+const {zoneMetrics}=m.exports;
+const zone={kind:'FVG',low:100,high:110,direction:'BUY',knownAt:1};
+const b=(t,l,h,c=105)=>({knownAt:t,t,l,h,c});
+assert.equal(zoneMetrics(zone,[b(1,99,111)]).filled,0);
+const partial=[b(1,99,111),b(2,108,112),b(3,107,112),b(4,111,115,113),b(5,105,109)];
+const p=zoneMetrics(zone,partial);assert.equal(p.filled,50);assert.equal(p.freshness,50);assert.equal(p.touches,2);assert.equal(p.touchBars,3);
+const fill=zoneMetrics(zone,[...partial,b(6,99,105)]);assert.equal(fill.filled,100);
+assert.equal(zoneMetrics(zone,[b(1,99,111),b(2,110,115,112)]).filled,0);
+assert.equal(zoneMetrics(zone,[b(2,105,109)]).completeHistory,false);
+const invalid=zoneMetrics(zone,[b(1,100,110),b(2,98,101,99),b(3,100,110)]);assert.equal(invalid.filled,10);
+const sell={...zone,direction:'SELL'};assert.equal(zoneMetrics(sell,partial).filled,30);
+console.log('PASS: formation exclusion, interval union, independent visits, boundary-only touch, missing coverage, invalidation cutoff, mirrored SELL behavior.');

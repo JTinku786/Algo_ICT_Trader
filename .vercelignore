@@ -1,0 +1,18 @@
+.env
+.env.*
+!.env.example
+.codex
+.codex-remote-attachments
+.agents
+.playwright-cli
+artifacts
+output
+tmp
+reviews
+Claude outputs
+backend
+cloudflared
+departments
+*.bak*
+public/reports/consolidation-research-trades.csv
+public/reports/consolidation-prearmed-trades.csv

@@ -1,0 +1,27 @@
+// Read-only ablation: same candles and settings; disable only the five-candle check in a separate Python process.
+const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),{spawn}=require('node:child_process');
+const decoder={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('src/lib/scalping-wire.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,decoder);const decode=decoder.exports.decodeScalpingResponse;
+const sources=JSON.parse(fs.readFileSync('public/reports/scalping-labs/sources.json','utf8'));
+const historical=JSON.parse(fs.readFileSync('public/reports/scalping-labs/coverage.json','utf8'));
+const audited=historical.references.filter(r=>r.status==='CANDIDATES_FOUND'&&r.selection);
+const output={generatedAt:new Date().toISOString(),method:'Identical current candles/settings and corrected shift lifetime; isolated Python ablation disables only TF1 five-candle validation. Candidate matches are not exact source-chart reproductions.',historicalUpdatedAt:historical.updatedAt,historicalStatuses:historical.references.reduce((o,r)=>(o[r.status]=(o[r.status]||0)+1,o),{}),references:[]};
+const destination='public/reports/scalping-labs/touch-window-reference-comparison.json';
+function summary(d,direction){const candidates=d.investigations.flatMap(i=>i.arrays.filter(a=>a.entry&&i.mss.direction===direction).map(a=>({key:`${a.entry.at}:${a.entry.price}`,entryAt:a.entry.at,price:a.entry.price,stop:a.entry.plan.stop,target:a.entry.plan.target,contextId:i.id,zoneId:a.zone.id})));const unique=[...new Map(candidates.map(c=>[c.key,c])).values()];return{count:unique.length,keys:unique.map(c=>c.key),examples:unique.slice(0,3)};}
+function baseline(input,direction){return new Promise((resolve,reject)=>{const py=spawn('python',['-c',`import sys,json,importlib.util
+from pathlib import Path
+sys.path.insert(0,'scripts')
+spec=importlib.util.spec_from_file_location('touch_ablation',Path('scripts/scalping_labs_updated.py'));labs=importlib.util.module_from_spec(spec);spec.loader.exec_module(labs)
+original=labs.TF1TouchWindow.proof
+def disabled(self,*args,**kwargs):
+ proof=original(self,*args,**kwargs);proof['valid']=True;proof['reason']='BASELINE_RULE_DISABLED';return proof
+labs.TF1TouchWindow.proof=disabled
+x=json.load(sys.stdin);d=labs.run(x['input']);out={}
+for i in d['investigations']:
+ if not i['mss'] or i['mss']['direction']!=x['direction']:continue
+ for a in i['arrays']:
+  e=a.get('entry')
+  if not e:continue
+  key=f"{e['at']}:{e['price']}";out[key]={'entryAt':e['at'],'price':e['price'],'stop':e['plan']['stop'],'target':e['plan']['target'],'contextId':i['id'],'zoneId':a['zone']['id']}
+json.dump(list(out.values()),sys.stdout)`],{windowsHide:true,env:{...process.env,SMC_CREDIT:'0'}});let text='',err='';const timer=setTimeout(()=>{py.kill();reject(Error('Baseline exceeded 120s'));},120000);py.stdout.on('data',b=>text+=b);py.stderr.on('data',b=>err+=b);py.on('error',reject);py.on('close',code=>{clearTimeout(timer);if(code)return reject(Error(err));try{const rows=JSON.parse(text);resolve({count:rows.length,keys:rows.map(c=>`${c.entryAt}:${c.price}`),examples:rows.slice(0,3)});}catch(e){reject(e);}});py.stdin.on('error',()=>{});py.stdin.end(JSON.stringify({input,direction}));});}
+async function compare(r){const s=sources.find(s=>s.id===r.id);const record={id:r.id,ticker:s.ticker,date:s.chartDate,direction:s.direction,sourceTimeframe:s.timeframe,timeframeAssumption:r.timeframeAssumption,selection:r.selection,historicalCandidateCount:r.candidateCount};try{const response=await fetch('http://localhost:3000/api/scalping-labs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(Object.entries(r.selection).filter(([,v])=>v!==null))),signal:AbortSignal.timeout(150000)});const d=decode(await response.json());if(!response.ok)throw Error(d.error);const input={...d.selection,higher:d.higher,lower:d.lower,daily:d.daily,scalping:d.scalping??d.selection.scalping};record.after=summary(d,s.direction);record.before=await baseline(input,s.direction);const before=new Set(record.before.keys);record.added=record.after.keys.filter(k=>!before.has(k));record.removed=record.before.keys.filter(k=>!record.after.keys.includes(k));record.status='COMPARED';}catch(e){record.status='ERROR';record.error=e.message;}output.references.push(record);output.generatedAt=new Date().toISOString();fs.writeFileSync(destination,JSON.stringify(output,null,2));console.log(`S${record.id} ${record.ticker} ${record.date}: ${record.before?.count??'?'} -> ${record.after?.count??'?'} ${record.error??''}`);}
+(async()=>{let cursor=0;const worker=async()=>{while(cursor<audited.length)await compare(audited[cursor++]);};await Promise.all([worker(),worker()]);const good=output.references.filter(r=>r.status==='COMPARED');output.summary={eligibleReferences:audited.length,compared:good.length,errors:output.references.length-good.length,referencesWithCandidatesBefore:good.filter(r=>r.before.count).length,referencesWithCandidatesAfter:good.filter(r=>r.after.count).length,referencesLost:good.filter(r=>r.before.count&&!r.after.count).map(r=>r.id),candidateEntriesBefore:good.reduce((n,r)=>n+r.before.count,0),candidateEntriesAfter:good.reduce((n,r)=>n+r.after.count,0),unexpectedAdded:good.reduce((n,r)=>n+r.added.length,0)};fs.writeFileSync(destination,JSON.stringify(output,null,2));console.log(JSON.stringify(output.summary));})().catch(e=>{console.error(e);process.exitCode=1;});

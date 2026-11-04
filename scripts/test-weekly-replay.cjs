@@ -1,0 +1,40 @@
+const fs=require('node:fs'),ts=require('typescript'),Module=require('node:module'),assert=require('node:assert/strict');
+const sweepModule=new Module('liquidity-sweeps');sweepModule._compile(ts.transpileModule(fs.readFileSync('src/lib/liquidity-sweeps.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,'liquidity-sweeps.cjs');
+const m=new Module('weekly-replay');m.require=id=>{if(id==='./liquidity-sweeps')return sweepModule.exports;throw new Error('Unexpected dependency '+id);};m._compile(ts.transpileModule(fs.readFileSync('src/lib/weekly-replay.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,'weekly-replay.cjs');
+const {weeklyReference,weeklyDecisions,completedWeeklyBars,deriveIctOverlays,buildWeeklyReplay,dailyExplanations,confirmedSwingPath}=m.exports;
+const b=(day,o,h,l,c)=>({day,t:Date.parse(day+'T05:00:00Z'),knownAt:Date.parse(day+'T21:00:00Z'),minute:0,o,h,l,c});
+const d=[b('2025-12-29',273,274.36,272.35,273),b('2025-12-30',273,274.08,272.28,273),b('2025-12-31',273,273.68,271.75,272),b('2026-01-02',272,277.84,269,271),b('2026-01-05',270.64,271.51,266.14,267.26),b('2026-01-06',267,267.55,262.12,262.36),b('2026-01-07',263,263.68,259.81,260.33),b('2026-01-08',257,259.29,255.7,259.04),b('2026-01-09',259,260.21,256.22,259.37),b('2026-01-12',259,261.3,256.8,260.25)];
+assert.equal(weeklyReference(d,'2026-01-06').high,277.84);assert.equal(weeklyReference(d,'2026-01-06').low,269);assert.equal(weeklyReference(d,'2026-01-12').high,271.51);assert.equal(weeklyReference(d,'2026-01-12').low,255.7);
+assert.equal(weeklyReference(d,'2026-01-12',['2026-01-08']),null);
+assert.equal(weeklyDecisions(d).find(x=>x.day==='2026-01-06').direction,'SELL');assert.equal(weeklyDecisions(d).at(-1).direction,'NEUTRAL');assert.equal(weeklyDecisions(d).length,d.length);
+const data={daily:d,bars:d,frame:'1d',instrument:{market:'us'},invalidDailyDays:[]};const cutoff=d[5].knownAt;const snap=buildWeeklyReplay(data,cutoff);const changed={...data,daily:d.map((x,i)=>i>5?{...x,h:9999,l:.01,c:999}:x),bars:d.map((x,i)=>i>5?{...x,h:9999,l:.01,c:999}:x)};assert.deepEqual(buildWeeklyReplay(changed,cutoff),snap);assert.equal(completedWeeklyBars(snap.daily,'2026-01-06').length,1);assert.equal(completedWeeklyBars(snap.daily,'2026-01-06')[0].c,271);
+const seq=[b('2026-01-05',9,10,8,9),b('2026-01-06',10,12,9,11),b('2026-01-07',12,14,11,13),b('2026-01-08',10,11,8,9),b('2026-01-09',8,9,7,8)];
+assert.equal(deriveIctOverlays(seq.slice(0,2),'1d','us',seq.slice(0,2)).filter(x=>x.kind==='FVG').length,0);
+const fvg=deriveIctOverlays(seq.slice(0,3),'1d','us',seq.slice(0,3)).find(x=>x.kind==='FVG');assert.ok(fvg);assert.equal(fvg.knownAt,seq[2].knownAt);assert.equal(fvg.touches,0);
+const events=deriveIctOverlays(seq,'1d','us',seq);assert.ok(events.some(x=>x.kind==='IFVG'&&x.knownAt===seq[3].knownAt));assert.ok(events.some(x=>x.kind==='BSL'&&x.origin===seq[2].t&&x.knownAt===seq[4].knownAt));
+assert.ok(!deriveIctOverlays(seq.slice(0,4),'1d','us',seq.slice(0,4)).some(x=>x.kind==='BSL'));
+assert.ok(dailyExplanations(d,'us').find(x=>x.day==='2026-01-06').reasons.some(x=>x.label==='Hunt Liquidity'));assert.deepEqual(dailyExplanations(d.slice(0,6),'us'),dailyExplanations(changed.daily.slice(0,6),'us'));
+const makeSeq=hs=>hs.map((h,i)=>b(new Date(Date.UTC(2026,0,1+i)).toISOString().slice(0,10),h-1,h,h-2,h-.5));
+const trend=makeSeq([10,11,15,12,11,10,9,8,9,10,11,16,13,12,11,10,11,12,11,10]);
+assert.equal(dailyExplanations(trend.slice(0,18),'us').at(-1).structure,'Higher highs / higher lows');
+assert.equal(dailyExplanations(trend.slice(0,18),'us').at(-1).higherHighs,true);assert.equal(dailyExplanations(trend.slice(0,18),'us').at(-1).lowerLows,false);
+const eqSeq=makeSeq([10,11,15,12,11,10,11,15,12,11,16]);
+assert.ok(!deriveIctOverlays(eqSeq.slice(0,9),'1d','us',eqSeq.slice(0,9)).some(z=>z.kind==='EQH'));
+const eqEvents=deriveIctOverlays(eqSeq,'1d','us',eqSeq);assert.ok(eqEvents.some(z=>z.kind==='EQH'&&z.knownAt===eqSeq[9].knownAt&&z.lastTouch===eqSeq[10].t&&z.status==='SWEPT'));
+const obSeq=[...trend.map(x=>({...x}))];obSeq[19]={...obSeq[19],o:9.8,c:8.5};obSeq.push(b('2026-01-21',9,20,8,19));
+const ob=deriveIctOverlays(obSeq,'1d','us',obSeq).find(z=>z.kind==='OB'&&z.knownAt===obSeq[20].knownAt);assert.ok(ob);assert.equal(ob.origin,obSeq[19].t);
+obSeq.push(b('2026-01-22',9,10,6,7));assert.ok(!deriveIctOverlays(obSeq,'1d','us',obSeq).some(z=>z.kind==='BREAKER'&&z.lineage===ob.id));
+const small=makeSeq([10,15,12]);assert.equal(confirmedSwingPath(small.slice(0,2)).length,0);const swing=confirmedSwingPath(small)[0];assert.equal(swing.kind,'HIGH');assert.equal(swing.origin,small[1].t);assert.equal(swing.knownAt,small[2].knownAt);
+const consecutiveHighs=makeSeq([10,15,12,16,14]).map((b,i)=>({...b,l:5+i,o:9+i,c:9+i}));const consolidated=confirmedSwingPath(consecutiveHighs);assert.equal(consolidated.length,1);assert.equal(consolidated[0].price,16);assert.equal(consolidated[0].knownAt,consecutiveHighs[4].knownAt);
+const alternating=makeSeq([10,15,12,11,13,14,12]).map((b,i)=>({...b,l:[8,10,9,7,9,12,10][i]}));assert.deepEqual(confirmedSwingPath(alternating).map(s=>s.kind),['HIGH','LOW','HIGH']);assert.ok(confirmedSwingPath(alternating).every(s=>s.origin!==alternating[0].t&&s.origin!==alternating.at(-1).t));
+const dual=makeSeq([10,15,12]);dual[1].l=1;assert.equal(confirmedSwingPath(dual).length,0);
+for(let i=2;i<d.length;i++){const prefix=d.slice(0,i+1),later=[...prefix,...d.slice(i+1).map(x=>({...x,h:9999,l:0,c:99}))];const asof=later.filter(b=>b.knownAt<=prefix.at(-1).knownAt);assert.deepEqual(confirmedSwingPath(asof),confirmedSwingPath(prefix));}
+console.log('PASS: strict three-bar pivots, right-close confirmation, alternating path, extreme replacement, no fabricated endpoints, outside-bar ambiguity and prefix invariance');
+console.log('PASS: daily HH/HL evidence, delayed equal-high confirmation and sweep, causal OB and no unsupported failed-OB breaker inversion');
+console.log('PASS: weekly holiday levels, rollover/reset, invalid-week rejection, neutral visibility, future invariance, completed weekly aggregation, causal FVG/IFVG/pivot confirmation, daily reason causality');
+(async()=>{
+ const live=await fetch('http://localhost:3000/api/daily-bias/replay?symbol=AAPL&tf=1d').then(r=>r.json());assert.ok(live.daily.length);const r=weeklyReference(live.daily,'2026-01-06');assert.ok(Math.abs(r.high-277.84)<.001&&Math.abs(r.low-269)<.001);assert.equal(r.sessions,4);
+ for(const tf of ['1h','30m','15m','5m']){const res=await fetch(`http://localhost:3000/api/daily-bias/replay?symbol=AAPL&tf=${tf}`);assert.equal(res.status,200);const x=await res.json();console.log(tf,x.bars.length,x.bars[0]?.day);assert.ok(x.bars.every(b=>b.knownAt>b.t));}
+ assert.equal((await fetch('http://localhost:3000/api/daily-bias/replay?symbol=BAD')).status,400);const spy=await fetch('http://localhost:3000/api/daily-bias/replay?symbol=SPY').then(r=>r.json());assert.equal(spy.bars.length,0);
+ fs.writeFileSync('output/daily-bias/weekly-replay-aapl-jan06.json',JSON.stringify({...buildWeeklyReplay(live,Date.parse('2026-01-06T21:00:00Z')),reasons:dailyExplanations(live.daily.filter(b=>b.knownAt<=Date.parse('2026-01-06T21:00:00Z')),'us')},null,2));console.log('PASS: native AAPL weekly range, five-frame API, invalid params, honest SPY no-data, evidence artifact');
+})().catch(e=>{console.error(e);process.exitCode=1;});

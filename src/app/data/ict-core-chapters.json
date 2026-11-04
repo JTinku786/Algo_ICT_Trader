@@ -1,0 +1,881 @@
+[
+  {
+    "id": "CC-M01-C01",
+    "month": 1,
+    "monthTitle": "Foundations",
+    "title": "Price delivery and the four market conditions",
+    "pages": [
+      4,
+      6,
+      9,
+      11,
+      13,
+      15
+    ],
+    "sourceFile": "Month01-September_ICT_Notes.pdf",
+    "sourceHash": "03e1f586b91ac94f2cfbad82ee40e572c169f9d03bc16cd3a7978ee29478660d",
+    "overview": "Price can consolidate, expand, retrace or reverse. Begin by describing the observed movement and the reference range; a market condition is context, not permission to enter. Expansion leaves balance, retracement returns into a recent move, and reversal changes its direction.",
+    "questions": [
+      "Identify the reference range",
+      "Describe the observed condition",
+      "Separate context from an entry signal"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M01-C02",
+    "month": 1,
+    "monthTitle": "Foundations",
+    "title": "Liquidity, three-bar swings and equilibrium",
+    "pages": [
+      17,
+      20,
+      24
+    ],
+    "sourceFile": "Month01-September_ICT_Notes.pdf",
+    "sourceHash": "03e1f586b91ac94f2cfbad82ee40e572c169f9d03bc16cd3a7978ee29478660d",
+    "overview": "Old highs and lows are potential liquidity references. A three-bar pivot needs one completed candle on either side of the middle candle. The midpoint belongs to a named range; it is not a universal support or resistance level. A cleaned alternating drawing and the raw confirmed pivots serve different purposes.",
+    "questions": [
+      "Mark an already known high or low",
+      "Wait for the right-hand candle to close",
+      "Name the range used for its midpoint"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M01-C03",
+    "month": 1,
+    "monthTitle": "Foundations",
+    "title": "Fair valuation and replay practice",
+    "pages": [
+      28,
+      32
+    ],
+    "sourceFile": "Month01-September_ICT_Notes.pdf",
+    "sourceHash": "03e1f586b91ac94f2cfbad82ee40e572c169f9d03bc16cd3a7978ee29478660d",
+    "overview": "A return into previously traversed price can provide a rebalancing observation. Identify the original move and the part revisited. A partial overlap does not prove that an entire inefficiency was filled, and a return into a zone does not by itself determine the next direction.",
+    "questions": [
+      "Identify the earlier price move",
+      "Distinguish overlap from full rebalance",
+      "Record the next confirmation or its absence"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M02-C01",
+    "month": 2,
+    "monthTitle": "Risk and trade framing",
+    "title": "Reward, drawdown and expectancy",
+    "pages": [
+      4,
+      8,
+      10
+    ],
+    "sourceFile": "Month02-October_Notes.pdf",
+    "sourceHash": "1add1b6298ff25daa104b4cb2974ef357b86d00d0023da3d4359fdc7103a7623",
+    "overview": "Reward multiples describe a proposed payoff; expectancy also depends on losses, costs and execution. Examine drawdown and losing streaks alongside average net R. The numerical illustrations in the source are teaching examples, not forecasts for an account.",
+    "questions": [
+      "Define risk before calculating reward",
+      "Include costs and losing trades",
+      "Inspect drawdown and sample size"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M02-C02",
+    "month": 2,
+    "monthTitle": "Risk and trade framing",
+    "title": "HTF location and LTF risk refinement",
+    "pages": [
+      25,
+      38,
+      44
+    ],
+    "sourceFile": "Month02-October_Notes.pdf",
+    "sourceHash": "1add1b6298ff25daa104b4cb2974ef357b86d00d0023da3d4359fdc7103a7623",
+    "overview": "Higher-timeframe location supplies context while a lower timeframe may refine entry and invalidation. Reducing the distance to a stop does not automatically improve a trade: the lower-timeframe trigger still needs to qualify, and the stop must match that setup.",
+    "questions": [
+      "Identify the higher-timeframe location",
+      "Wait for a lower-timeframe trigger",
+      "Check whether the stop invalidates that trigger"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M02-C03",
+    "month": 2,
+    "monthTitle": "Risk and trade framing",
+    "title": "Stops, loss recovery and position sizing",
+    "pages": [
+      54,
+      57,
+      63,
+      65,
+      73
+    ],
+    "sourceFile": "Month02-October_Notes.pdf",
+    "sourceHash": "1add1b6298ff25daa104b4cb2974ef357b86d00d0023da3d4359fdc7103a7623",
+    "overview": "Position size follows the chosen loss budget and the distance to a valid stop. Partial exits change the realized payoff distribution. After a loss, use an explicit risk policy rather than an unplanned attempt to recover the money.",
+    "questions": [
+      "Set a loss budget",
+      "Specify stops and partial exits",
+      "Apply the same policy after a loss"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M03-C01",
+    "month": 3,
+    "monthTitle": "Market structure",
+    "title": "Monthly to weekly to daily structure",
+    "pages": [
+      4,
+      12
+    ],
+    "sourceFile": "Month03-november_notes.pdf",
+    "sourceHash": "cd0532366287ef3f192efc84d8f2e1dd5cd9b8b50e38993a19083776050548c4",
+    "overview": "Study the same price movement at monthly, weekly and daily resolution. Different resolutions can describe different phases of that movement. Use completed higher-timeframe bars for historical decisions and identify which frame supplies context versus execution.",
+    "questions": [
+      "Use completed higher-timeframe bars",
+      "Record each frame separately",
+      "Resolve agreement or conflict explicitly"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M03-C02",
+    "month": 3,
+    "monthTitle": "Market structure",
+    "title": "Institutional sponsorship and lower-frame inspection",
+    "pages": [
+      49,
+      51
+    ],
+    "sourceFile": "Month03-november_notes.pdf",
+    "sourceHash": "cd0532366287ef3f192efc84d8f2e1dd5cd9b8b50e38993a19083776050548c4",
+    "overview": "Inspect reactions at previously identified price references before moving to a lower timeframe. A reaction is observable; institutional participation is an interpretation. Preserve the exact level, timing and candle evidence instead of replacing them with a confidence label.",
+    "questions": [
+      "Select a known reference level",
+      "Record the subsequent reaction",
+      "Inspect the lower-timeframe sequence"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M03-C03",
+    "month": 3,
+    "monthTitle": "Market structure",
+    "title": "SMT and retail-pattern context",
+    "pages": [
+      55,
+      58,
+      64,
+      68
+    ],
+    "sourceFile": "Month03-november_notes.pdf",
+    "sourceHash": "cd0532366287ef3f192efc84d8f2e1dd5cd9b8b50e38993a19083776050548c4",
+    "overview": "SMT compares related markets at corresponding swings. A failure to confirm a new extreme is different from a price-chart trendline pattern. The relationship, sign, timestamp alignment and available data must be specified before making a divergence claim.",
+    "questions": [
+      "Specify the comparison instruments",
+      "Align their available observations",
+      "Distinguish confirmation from divergence"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M04-C01",
+    "month": 4,
+    "monthTitle": "Liquidity and PD arrays",
+    "title": "Interest-rate triad and intermarket confirmation",
+    "pages": [
+      4,
+      6,
+      18
+    ],
+    "sourceFile": "Month04-december_study_notes.pdf",
+    "sourceHash": "b6d2db911732707e2516e0cc2e26a37bbb3ed8af3ecad6fd3bdcd02dc38c0b40",
+    "overview": "The source uses bond-market comparisons and the dollar context to frame currency analysis. These require historical companion instruments. Without them, the intermarket condition is unknown; the chart of the traded instrument cannot stand in for missing confirmation.",
+    "questions": [
+      "Identify the required bond and dollar series",
+      "Use observations available at the cutoff",
+      "Report missing confirmation as unknown"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M04-C02",
+    "month": 4,
+    "monthTitle": "Liquidity and PD arrays",
+    "title": "Internal/external liquidity and bullish order blocks",
+    "pages": [
+      19,
+      20
+    ],
+    "sourceFile": "Month04-december_study_notes.pdf",
+    "sourceHash": "b6d2db911732707e2516e0cc2e26a37bbb3ed8af3ecad6fd3bdcd02dc38c0b40",
+    "overview": "Internal liquidity and external liquidity depend on a named dealing range. An order-block candidate needs its own origin, validation and return conditions. Treat the current replay detector as a mechanical candidate until those source conditions have been checked individually.",
+    "questions": [
+      "Name the dealing range",
+      "Separate internal and external objectives",
+      "Verify origin, validation and retest independently"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M04-C03",
+    "month": 4,
+    "monthTitle": "Liquidity and PD arrays",
+    "title": "Bias, breakers, rejection and liquidity voids",
+    "pages": [
+      27,
+      53,
+      66,
+      79
+    ],
+    "sourceFile": "Month04-december_study_notes.pdf",
+    "sourceHash": "b6d2db911732707e2516e0cc2e26a37bbb3ed8af3ecad6fd3bdcd02dc38c0b40",
+    "overview": "Breaker, mitigation and rejection blocks describe distinct contextual sequences. Do not turn every failed order block into a validated breaker or every fast move into a liquidity void. Track the sequence, bounds and invalidation of each proposed structure.",
+    "questions": [
+      "Identify the structure and its prerequisite sequence",
+      "Record zone bounds and known time",
+      "Check the specific return and invalidation conditions"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M05-C01",
+    "month": 5,
+    "monthTitle": "Long-term analysis",
+    "title": "Quarterly shifts and anchored IPDA ranges",
+    "pages": [
+      4,
+      11,
+      12,
+      15,
+      19
+    ],
+    "sourceFile": "Month05-January_2017_Study_Notes.pdf",
+    "sourceHash": "da7a59ae87c51a0fd2d6ef7b84d06072f24bf3795b8e7c993ca3d87ec4bb8594",
+    "overview": "An anchored lookback and a quarterly scenario give a long-term reference frame. Specify the anchor and lookback before measuring its extremes. Forward projections are hypotheses; they must not select their starting range using future prices.",
+    "questions": [
+      "Fix the anchor and lookback",
+      "Compute only from already available bars",
+      "Separate a projection from an observed result"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M05-C02",
+    "month": 5,
+    "monthTitle": "Long-term analysis",
+    "title": "Top-down intermarket and seasonal context",
+    "pages": [
+      55,
+      79,
+      92
+    ],
+    "sourceFile": "Month05-January_2017_Study_Notes.pdf",
+    "sourceHash": "da7a59ae87c51a0fd2d6ef7b84d06072f24bf3795b8e7c993ca3d87ec4bb8594",
+    "overview": "Top-down analysis can combine price structure with related assets and seasonal context. Each additional input needs an as-of timestamp and a defined interpretation. A seasonal tendency is contextual evidence rather than a requirement that price repeat an old pattern.",
+    "questions": [
+      "Identify price and contextual inputs",
+      "Check their historical availability",
+      "Record agreement and disagreement"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M05-C03",
+    "month": 5,
+    "monthTitle": "Long-term analysis",
+    "title": "HTF risk and order execution",
+    "pages": [
+      110,
+      128,
+      147
+    ],
+    "sourceFile": "Month05-January_2017_Study_Notes.pdf",
+    "sourceHash": "da7a59ae87c51a0fd2d6ef7b84d06072f24bf3795b8e7c993ca3d87ec4bb8594",
+    "overview": "A higher-timeframe setup can lead to different entry policies. Market, stop and limit orders have different eligibility and fill behavior. The same directional idea must be tested under a declared execution and risk contract.",
+    "questions": [
+      "Specify entry order behavior",
+      "Define invalidation and holding policy",
+      "Separate setup time from possible fill time"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M06-C01",
+    "month": 6,
+    "monthTitle": "Swing trading",
+    "title": "Market selection and profile",
+    "pages": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "sourceFile": "Month06-feb_studynotes.pdf",
+    "sourceHash": "9264e93c7fc05a26e7671f711130f58ce04c59f5c6215fb28608bff002100d47",
+    "overview": "Swing-trade selection begins with the market condition and higher-timeframe location. A developing consolidation, trend or reversal should be described with observable criteria. Duration and objectives belong to the chosen model, not a label shared by all trades.",
+    "questions": [
+      "Describe the market condition",
+      "Choose the appropriate holding model",
+      "Record why the market qualifies or does not"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M06-C02",
+    "month": 6,
+    "monthTitle": "Swing trading",
+    "title": "Monthly/weekly/daily PD-array alignment",
+    "pages": [
+      25,
+      26,
+      35,
+      41
+    ],
+    "sourceFile": "Month06-feb_studynotes.pdf",
+    "sourceHash": "9264e93c7fc05a26e7671f711130f58ce04c59f5c6215fb28608bff002100d47",
+    "overview": "A PD-array map places candidate references across monthly, weekly and daily frames. Premium and discount are relative to a specified range. A directional hierarchy should explain the location and intended objective before seeking execution.",
+    "questions": [
+      "Name the range behind premium or discount",
+      "Map references by timeframe",
+      "Record directional agreement or conflict"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M06-C03",
+    "month": 6,
+    "monthTitle": "Swing trading",
+    "title": "Trade objectives, partials and execution",
+    "pages": [
+      46,
+      57,
+      69,
+      80,
+      89
+    ],
+    "sourceFile": "Month06-feb_studynotes.pdf",
+    "sourceHash": "9264e93c7fc05a26e7671f711130f58ce04c59f5c6215fb28608bff002100d47",
+    "overview": "Swing management includes the first objective, any partial reduction, the remaining objective and cancellation. Overnight holding changes the risk contract. Evaluate the actual combined payoff rather than treating every target as if it used the full starting position.",
+    "questions": [
+      "Define first and remaining objectives",
+      "Specify partial quantities and stop changes",
+      "Include overnight and cancellation rules"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M07-C01",
+    "month": 7,
+    "monthTitle": "Short-term trading",
+    "title": "PD-array hierarchy and HTF sequence",
+    "pages": [
+      4,
+      6,
+      11,
+      12
+    ],
+    "sourceFile": "Month07-march_studynotes.pdf",
+    "sourceHash": "269b3cf1d77965d03cd6b203a556101065eea77c1fd9992095fa7f5dd6200896",
+    "overview": "Short-term analysis connects higher-timeframe PD arrays with an execution timeframe. Preserve the hierarchy rather than overlaying every level equally. A location can qualify the search for a setup without constituting its entry.",
+    "questions": [
+      "Separate context and execution frames",
+      "Locate the relevant PD array",
+      "Wait for the declared execution pattern"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M07-C02",
+    "month": 7,
+    "monthTitle": "Short-term trading",
+    "title": "Weekly profiles and reversal scenarios",
+    "pages": [
+      22,
+      34,
+      50,
+      99,
+      108
+    ],
+    "sourceFile": "Month07-march_studynotes.pdf",
+    "sourceHash": "269b3cf1d77965d03cd6b203a556101065eea77c1fd9992095fa7f5dd6200896",
+    "overview": "Weekly profiles describe possible paths through the trading week. On Monday or Wednesday the eventual weekly high and low are not yet known. Track a developing scenario and retain the cases that fail to produce its expected sequence.",
+    "questions": [
+      "Use only information known that weekday",
+      "Record the developing profile",
+      "Retain failures and invalidations"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M07-C03",
+    "month": 7,
+    "monthTitle": "Short-term trading",
+    "title": "Time/price alignment and failure handling",
+    "pages": [
+      67,
+      95,
+      115,
+      116,
+      133
+    ],
+    "sourceFile": "Month07-march_studynotes.pdf",
+    "sourceHash": "269b3cf1d77965d03cd6b203a556101065eea77c1fd9992095fa7f5dd6200896",
+    "overview": "Time and price must be inspected together for a short-term model. A relevant price reached outside a qualifying window may have a different status. Explicit failure handling makes it possible to explain why an attractive-looking replay did not become a trade.",
+    "questions": [
+      "Check the time and location together",
+      "Name confirmation and invalidation",
+      "Explain a rejected scenario"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M08-C01",
+    "month": 8,
+    "monthTitle": "Day trading",
+    "title": "Daily framing, time of day and weekly context",
+    "pages": [
+      4,
+      5,
+      6,
+      7,
+      10
+    ],
+    "sourceFile": "Month08-april_study_notes.pdf",
+    "sourceHash": "e7dbb5dc662ba5adc8da3ec0ef573c551105d0be3b3e54fecb5cc2e86eb9eb11",
+    "overview": "Daily plans combine higher-timeframe context, the developing weekly range and a market-specific session. A Forex daily range and an equity regular session are not interchangeable. State the session, its timezone and the observations available before the planned entry.",
+    "questions": [
+      "Select the market session",
+      "Identify prior-day and prior-week references",
+      "Describe the plan before the trigger"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M08-C02",
+    "month": 8,
+    "monthTitle": "Day trading",
+    "title": "Killzones, CBDR and range qualification",
+    "pages": [
+      22,
+      32,
+      38,
+      43
+    ],
+    "sourceFile": "Month08-april_study_notes.pdf",
+    "sourceHash": "e7dbb5dc662ba5adc8da3ec0ef573c551105d0be3b3e54fecb5cc2e86eb9eb11",
+    "overview": "Killzones and dealer ranges require precise clock windows and market applicability. A range becomes final only after its window completes. Daylight saving, gaps and holiday sessions must be handled before comparing the range with a threshold.",
+    "questions": [
+      "Define the window and timezone",
+      "Wait for the range window to complete",
+      "Verify applicability and data completeness"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M08-C03",
+    "month": 8,
+    "monthTitle": "Day trading",
+    "title": "Intraday profiles and entry/exit planning",
+    "pages": [
+      52,
+      53,
+      64,
+      74,
+      85
+    ],
+    "sourceFile": "Month08-april_study_notes.pdf",
+    "sourceHash": "e7dbb5dc662ba5adc8da3ec0ef573c551105d0be3b3e54fecb5cc2e86eb9eb11",
+    "overview": "An intraday profile is a developing scenario with entry and exit criteria. Separate the forecast range from realized price delivery. A proposed daily objective needs a stated derivation, and an entry requires more than touching that objective or a nearby array.",
+    "questions": [
+      "Define the developing profile",
+      "Record an eligible entry trigger",
+      "State the objective and exit policy"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M09-C01",
+    "month": 9,
+    "monthTitle": "Advanced day trading",
+    "title": "Sentiment, entries and daily projections",
+    "pages": [
+      4,
+      5,
+      6,
+      14,
+      21
+    ],
+    "sourceFile": "Month09-may_studynotes.pdf",
+    "sourceHash": "76bec67b6abd505377033622796f4f111983297f5f6115773cf995e993aeedde",
+    "overview": "Advanced day-trading ideas can combine sentiment references, entry location and projected daily movement. Each input has its own definition and timestamp. Compare a projection with the outcome without changing the projection after seeing the day close.",
+    "questions": [
+      "Fix the sentiment observation",
+      "Timestamp the entry prerequisites",
+      "Keep the original projection for comparison"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M09-C02",
+    "month": 9,
+    "monthTitle": "Advanced day trading",
+    "title": "Consolidation, intraday and intraweek reversals",
+    "pages": [
+      34,
+      40,
+      53,
+      66
+    ],
+    "sourceFile": "Month09-may_studynotes.pdf",
+    "sourceHash": "76bec67b6abd505377033622796f4f111983297f5f6115773cf995e993aeedde",
+    "overview": "Consolidation and reversal scenarios need an explicit reference range and sequence of extremes. A one-sided sweep and a double-sided sweep can have different interpretations. Keep neutral and unresolved outcomes rather than forcing every scenario into a buy or sell.",
+    "questions": [
+      "Name the range and swept side",
+      "Observe the subsequent response",
+      "Preserve neutral or unresolved cases"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M09-C03",
+    "month": 9,
+    "monthTitle": "Advanced day trading",
+    "title": "Accumulation/distribution and London-close exits",
+    "pages": [
+      58,
+      60,
+      77,
+      79,
+      92,
+      106
+    ],
+    "sourceFile": "Month09-may_studynotes.pdf",
+    "sourceHash": "76bec67b6abd505377033622796f4f111983297f5f6115773cf995e993aeedde",
+    "overview": "Accumulation, reaccumulation, distribution and redistribution are contextual interpretations of a sequence. Describe what price actually did and when the model became eligible. Session exits, including London-close ideas, need market-specific timing and execution assumptions.",
+    "questions": [
+      "Record the observable sequence",
+      "Identify the eligible program hypothesis",
+      "Specify session exit assumptions"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M10-C01",
+    "month": 10,
+    "monthTitle": "Asset-specific trading",
+    "title": "Commodity selection, seasonality and COT",
+    "pages": [
+      4,
+      51,
+      63,
+      69,
+      73
+    ],
+    "sourceFile": "Month10-june_2017_study_notes.pdf",
+    "sourceHash": "f3a4596c493bb9397a1ca76a54267964773a338b1f13ef5b844ccee169eb63bc",
+    "overview": "Commodity research requires the actual contracts, roll policy and companion positioning data. Seasonal and COT observations must be available as of the research date. Stock OHLC cannot substitute for a missing commodity or positioning series.",
+    "questions": [
+      "Identify contract and roll policy",
+      "Check positioning publication time",
+      "Use the correct seasonal reference"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M10-C02",
+    "month": 10,
+    "monthTitle": "Asset-specific trading",
+    "title": "Open interest and news-aware analysis",
+    "pages": [
+      74,
+      75,
+      76,
+      99,
+      101
+    ],
+    "sourceFile": "Month10-june_2017_study_notes.pdf",
+    "sourceHash": "f3a4596c493bb9397a1ca76a54267964773a338b1f13ef5b844ccee169eb63bc",
+    "overview": "Open interest and event context add information beyond price candles. A released figure becomes available at publication, not at the period it describes. Test a model with and without these inputs and keep missing data visible.",
+    "questions": [
+      "Identify the open-interest or event source",
+      "Use its publication timestamp",
+      "Distinguish unavailable from adverse evidence"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M10-C03",
+    "month": 10,
+    "monthTitle": "Asset-specific trading",
+    "title": "Index SMT, index sessions and equity context",
+    "pages": [
+      126,
+      147,
+      148,
+      151,
+      155,
+      176,
+      186,
+      201
+    ],
+    "sourceFile": "Month10-june_2017_study_notes.pdf",
+    "sourceHash": "f3a4596c493bb9397a1ca76a54267964773a338b1f13ef5b844ccee169eb63bc",
+    "overview": "Index comparisons and equity selection require the correct instrument relationships and exchange sessions. Index futures, ETFs and cash indices have different trading contracts. A relative swing comparison needs matching timestamps and an explicit relationship.",
+    "questions": [
+      "Identify the instrument type",
+      "Align sessions and related swings",
+      "Keep execution adapters distinct"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M11-C01",
+    "month": 11,
+    "monthTitle": "Asset selection",
+    "title": "Commodity sectors and fundamentals",
+    "pages": [
+      4,
+      5,
+      6,
+      7,
+      13,
+      18
+    ],
+    "sourceFile": "Month11-july_2017_study_notes.pdf",
+    "sourceHash": "16b4437c02e58bb4e486ff71feedc3cb9c08d114594baf62e0a61a583f987b75",
+    "overview": "Commodity sectors have different fundamentals and contract behavior. Build a watchlist from a declared selection method and data available at the time. Sector strength can select candidates but does not validate a trade entry.",
+    "questions": [
+      "Choose the sector and relevant fundamentals",
+      "Construct an as-of watchlist",
+      "Require a separate price setup"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M11-C02",
+    "month": 11,
+    "monthTitle": "Asset selection",
+    "title": "Forex strength and currency selection",
+    "pages": [
+      21,
+      29,
+      39
+    ],
+    "sourceFile": "Month11-july_2017_study_notes.pdf",
+    "sourceHash": "16b4437c02e58bb4e486ff71feedc3cb9c08d114594baf62e0a61a583f987b75",
+    "overview": "Currency selection can compare relative strength and weakness. The comparison universe, lookback and quotation direction must be fixed. Ranking a currency pair is a selection step; the setup and execution checklist still apply.",
+    "questions": [
+      "Fix the universe and lookback",
+      "Account for quotation direction",
+      "Separate ranking from execution"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M11-C03",
+    "month": 11,
+    "monthTitle": "Asset selection",
+    "title": "Stock screens and bond-market context",
+    "pages": [
+      45,
+      48,
+      51,
+      52
+    ],
+    "sourceFile": "Month11-july_2017_study_notes.pdf",
+    "sourceHash": "16b4437c02e58bb4e486ff71feedc3cb9c08d114594baf62e0a61a583f987b75",
+    "overview": "Stock screens and bond context use asset-specific inputs. Earnings and fundamental screens require historical availability, while bonds require the correct instruments. Present which inputs qualify a watchlist and which required inputs remain unavailable.",
+    "questions": [
+      "Use as-of screen and earnings data",
+      "Identify the correct bond comparison",
+      "Record missing requirements"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M12-C01",
+    "month": 12,
+    "monthTitle": "Top-down integration",
+    "title": "Monthly-to-weekly decision flow",
+    "pages": [
+      4,
+      11,
+      20
+    ],
+    "sourceFile": "Month12 - 1 August.pdf",
+    "sourceHash": "eeb5ccbb831739f6bef7faedbf54c760716775c210fcdab93b5167a35b87875c",
+    "overview": "Monthly context flows into a weekly scenario through explicit inputs and decision branches. Seasonal, rate and intermarket observations cannot be inferred from one price series. Show each condition as supported, contradicted or unknown before forming a provisional bias.",
+    "questions": [
+      "Inspect monthly context inputs",
+      "Map the weekly location",
+      "Show unknown branches explicitly"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M12-C02",
+    "month": 12,
+    "monthTitle": "Top-down integration",
+    "title": "Weekly-to-daily decision flow",
+    "pages": [
+      21,
+      29,
+      38
+    ],
+    "sourceFile": "Month12 - 1 August.pdf",
+    "sourceHash": "eeb5ccbb831739f6bef7faedbf54c760716775c210fcdab93b5167a35b87875c",
+    "overview": "A weekly scenario can frame the next daily plan, but it does not determine every candle. Record the previous weekly evidence, daily location and any conflicting condition. Inside or neutral days remain part of the analysis and can leave the plan waiting.",
+    "questions": [
+      "Record weekly evidence at the cutoff",
+      "Inspect daily location and conflicts",
+      "Keep waiting and neutral states"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M12-C03",
+    "month": 12,
+    "monthTitle": "Top-down integration",
+    "title": "Daily-to-4H decision flow",
+    "pages": [
+      39,
+      47,
+      56
+    ],
+    "sourceFile": "Month12 - 1 August.pdf",
+    "sourceHash": "eeb5ccbb831739f6bef7faedbf54c760716775c210fcdab93b5167a35b87875c",
+    "overview": "Daily context can direct a search on the four-hour chart. The four-hour bar boundary must match the selected market session. Its setup becomes usable only when all required completed bars and higher-timeframe evidence are available.",
+    "questions": [
+      "Use the declared four-hour aggregation",
+      "Check daily and four-hour prerequisites",
+      "Wait for completed confirmation"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M12-C04",
+    "month": 12,
+    "monthTitle": "Top-down integration",
+    "title": "4H-to-5m execution flow",
+    "pages": [
+      57,
+      65,
+      75,
+      76
+    ],
+    "sourceFile": "Month12 - 1 August.pdf",
+    "sourceHash": "eeb5ccbb831739f6bef7faedbf54c760716775c210fcdab93b5167a35b87875c",
+    "overview": "Lower-timeframe execution follows the higher-timeframe setup rather than replacing it. Keep condition, staging and execution distinct. If the historical data cannot resolve same-bar fill and stop ordering, classify the outcome as ambiguous.",
+    "questions": [
+      "Confirm higher-timeframe staging",
+      "Wait for the lower-timeframe trigger",
+      "Record execution ambiguity"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  },
+  {
+    "id": "CC-M12-C05",
+    "month": 12,
+    "monthTitle": "Top-down integration",
+    "title": "Asset adapters and four model examples",
+    "pages": [
+      83,
+      84,
+      88,
+      97,
+      98,
+      99,
+      100
+    ],
+    "sourceFile": "Month12 - 1 August.pdf",
+    "sourceHash": "eeb5ccbb831739f6bef7faedbf54c760716775c210fcdab93b5167a35b87875c",
+    "overview": "The final source examples connect directional context, a retracement into an array and a specific execution pattern. Each example needs its own complete strategy contract. Asset adaptations and reverse-direction variants need independent verification before reuse.",
+    "questions": [
+      "Select one explicit model example",
+      "Specify every prerequisite and management rule",
+      "Verify the asset and direction adaptation"
+    ],
+    "sourceReview": "Initial source anchors reviewed; full rule specification pending",
+    "detectorStatus": "Unvalidated",
+    "backtestStatus": "Not run"
+  }
+]
