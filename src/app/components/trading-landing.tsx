@@ -57,8 +57,9 @@ const ScalpingLabs = dynamic(() => import("./scalping-labs"), { ssr: false });
 const SmtDivergence = dynamic(() => import("./smt-divergence"), { ssr: false });
 const TopDownAnalysis = dynamic(() => import("./top-down-analysis"), { ssr: false });
 const IctCoreWorkspace = dynamic(() => import("./ict-core-workspace"), { ssr: false });
+const AgentDesk = dynamic(() => import("./agent-desk"), { ssr: false });
 
-type Tab = "reversals-updated" | "fib-calculation" | "scalping-labs" | "market-structure-shift" | "swing-trading" | "smt-divergence" | "top-down" | "ict-core" | "daily-bias" | "realtime-orders" | "account-management" | "strategy-builder" | "options-lab" | "tradezella" | "stonk" | "backtest" | "reversal" | "consolidation" | "expansion" | "amd" | "ml" | "blogs" | "monitoring" | "live-orders" | "deployments";
+type Tab = "agent-desk" | "reversals-updated" | "fib-calculation" | "scalping-labs" | "market-structure-shift" | "swing-trading" | "smt-divergence" | "top-down" | "ict-core" | "daily-bias" | "realtime-orders" | "account-management" | "strategy-builder" | "options-lab" | "tradezella" | "stonk" | "backtest" | "reversal" | "consolidation" | "expansion" | "amd" | "ml" | "blogs" | "monitoring" | "live-orders" | "deployments";
 
 // Hidden on the public Vercel deployment (set NEXT_PUBLIC_HIDE_ACCOUNT_MGMT=true there; unset locally).
 const HIDE_ACCOUNT_MGMT = process.env.NEXT_PUBLIC_HIDE_ACCOUNT_MGMT === "true";
@@ -71,6 +72,7 @@ const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: st
   { id: "top-down", label: "Top Down Analysis", icon: Layers },
   { id: "swing-trading", label: "Swing Trading", icon: TrendingUp },
   { id: "ict-core", label: "ICT Core", icon: BookOpen },
+  { id: "agent-desk", label: "Agent Desk", icon: Bot },
   { id: "realtime-orders", label: "Realtime Orders", icon: ActivitySquare },
   ...(HIDE_ACCOUNT_MGMT ? [] : [{ id: "account-management" as Tab, label: "Account Management", icon: UsersRound }]),
   { id: "strategy-builder", label: "Strategy Builder", icon: SlidersHorizontal },
@@ -210,6 +212,7 @@ export default function TradingLanding() {
             </div>
 
             <div className="flex-1 overflow-auto p-4 md:p-6">
+              {activeTab === "agent-desk" ? <AgentDesk /> : null}
               {activeTab === "realtime-orders" ? <RealtimeOrdersDashboard onOpenTrade={openTrade} /> : null}
               {activeTab === "account-management" && !HIDE_ACCOUNT_MGMT ? <AccountManagement onOpenTrade={openTrade} /> : null}
               {activeTab === "strategy-builder" ? <SictStrategyBuilder onOpenBacktest={() => setActiveTab("backtest")} /> : null}

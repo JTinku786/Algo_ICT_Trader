@@ -83,6 +83,29 @@ Pick a strategy and press **Run** to see profit, win rate, drawdown, equity curv
 
 ---
 
+## 🛰️ Agent Desk — the whole system as six agents
+
+The **Agent Desk** tab shows every real-time strategy as one assembly line of six agents, each with one job and a hard handoff to the next. Every number is a real row from the live tables — nothing is simulated.
+
+![Agent Desk](docs/images/tabs/agent-desk.png)
+
+| Agent | Its one job | Where the data comes from |
+|---|---|---|
+| 🔍 **Scout** | Finds setups across 6 strategy lanes (US, India, FX), every 2–5 min | strategy scans → candidate signals |
+| 🔻 **Filter** | Kills anything that fails a hard rule — one fail = killed | each candidate's rule checks (session window, not a repeat, right side of the open, quiet open / nested OB, R:R) |
+| 📊 **Analyst** | Scores what's left, 0–100 | Titania ML probability (shown in shadow mode for ICT; a real gate for IGS01V2) |
+| ⚡ **Executor** | Places the trade | armed limits, paper option fills, OANDA live FX, India broker orders |
+| 🛡️ **Risk** | Guards every entry | stop-before-entry cancels, OANDA live-gate blocks, stops on a 5m close beyond SL |
+| 📝 **Logger** | Writes everything down | every event + Discord alert deliveries |
+
+**Lanes on the desk:** Scalping OB×OB V4 · BPR×OB V3 · IFVG×OB V1 (US options, paper) · Reversal k1 (US + FX, FX 1H live on OANDA) · ICT S16 / S03 / S-CH08 / S-CH10 (India + US) · IGS01V2 London sweep (FX).
+
+**How to use it:** pick **24h / 3 days / 7 days**. **Live** refreshes every 30 seconds. **Replay the window** plays the whole period back event by event — watch candidates arrive, get killed or passed, scored, traded and closed, with the R curve building up.
+
+![Agent Desk replay](docs/images/tabs/agent-desk-replay.png)
+
+---
+
 ## 🤖 Titania Assistant — your AI trading copilot
 
 Click **Titania Assistant** at the bottom of the left menu. A chat window opens that **knows which tab you are on** and answers from Titania's own data and documents.
@@ -143,6 +166,7 @@ Click a tab name to see its picture.
 
 | Tab | In plain words |
 |---|---|
+| **Agent Desk** | All real-time strategies as six agents (Scout → Filter → Analyst → Executor → Risk → Logger), live or replayed (see above) |
 | **Realtime Orders** | Every live / paper ICT signal and order, with scorecard, charts and the trade explanation (see the tour above) |
 | **Live Orders** | Open positions, wins/losses, Discord alerts and every order event, refreshing every 5 seconds |
 | **Reversal** | Trend-reversal setups (k1: OTE 62% limit, 2R target, stop on a 5m close) — paper, plus OANDA live for forex |
